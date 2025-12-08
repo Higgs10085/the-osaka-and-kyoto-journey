@@ -1,0 +1,869 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content">
+    <title>騎士團討伐魔王遠征隊</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;500;700&family=Great+Vibes&display=swap" rel="stylesheet">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { 
+                        serif: ['"Shippori Mincho"', 'serif'],
+                        cursive: ['"Great Vibes"', 'cursive']
+                    },
+                    colors: {
+                        magic: {
+                            dark: '#0f172a', mist: 'rgba(255, 255, 255, 0.08)', ice: '#a5f3fc',
+                            silver: '#e2e8f0', glow: 'rgba(165, 243, 252, 0.4)', active: '#ffffff',
+                            danger: '#ef4444',
+                        }
+                    },
+                    animation: {
+                        'spin-slow': 'spin 8s linear infinite',
+                        'float': 'float 6s ease-in-out infinite',
+                        'slide-up': 'slide-up 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
+                        'fade-in': 'fade-in 0.5s ease-out forwards',
+                    },
+                    keyframes: {
+                        float: { '0%, 100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(-10px)' } },
+                        'slide-up': { '0%': { transform: 'translateY(100%)' }, '100%': { transform: 'translateY(0)' } },
+                        'fade-in': { '0%': { opacity: '0', transform: 'translateY(10px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        html, body {
+            height: 100%; width: 100%; overflow: hidden;
+            background: linear-gradient(to bottom, #dbeafe 0%, #1e3a8a 50%, #020617 100%);
+            color: #e2e8f0; -webkit-tap-highlight-color: transparent;
+        }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .glass-panel {
+            background: rgba(2, 6, 23, 0.6); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.15); box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
+        }
+        .bottom-sheet {
+            background: rgba(15, 23, 42, 0.98); backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(165, 243, 252, 0.3); box-shadow: 0 -10px 40px rgba(0,0,0,0.5);
+            max-height: 85dvh; display: flex; flex-direction: column;
+        }
+        .sortable-ghost { opacity: 0.3; background: rgba(165, 243, 252, 0.1); }
+        .sortable-drag { 
+            cursor: grabbing; opacity: 1; background: rgba(30, 41, 59, 0.9); 
+            border: 1px solid #a5f3fc; transform: scale(1.02); box-shadow: 0 10px 25px rgba(0,0,0,0.5); z-index: 50;
+        }
+        .text-glow { text-shadow: 0 0 10px rgba(165, 243, 252, 0.5); }
+        .magic-input {
+            width: 100%; background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(255, 255, 255, 0.15);
+            color: white; padding: 12px 16px; border-radius: 16px; font-size: 16px; outline: none; transition: all 0.3s;
+        }
+        .magic-input:focus { border-color: #a5f3fc; background: rgba(0, 0, 0, 0.5); box-shadow: 0 0 10px rgba(165, 243, 252, 0.2); }
+        .scroller { overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior-y: contain; -ms-overflow-style: none; scrollbar-width: none; }
+        .scroller::-webkit-scrollbar { display: none; }
+    </style>
+</head>
+<body class="font-serif antialiased relative select-none text-base">
+
+    <div id="app" class="h-full w-full flex flex-col relative z-10">
+        
+        <div v-for="n in 10" :key="n" class="absolute rounded-full pointer-events-none animate-float opacity-30 bg-magic-ice blur-[2px]"
+             :style="{ left: Math.random() * 100 + '%', top: Math.random() * 100 + '%', width: Math.random() * 4 + 'px', height: Math.random() * 4 + 'px', animationDuration: Math.random() * 10 + 15 + 's' }">
+        </div>
+
+        <transition name="fade" mode="out-in">
+            <div v-if="isLoading" class="absolute inset-0 z-[100] flex flex-col items-center justify-center bg-magic-dark text-magic-ice">
+                <div class="relative w-24 h-24 mb-6">
+                    <div class="absolute inset-0 border-4 border-magic-ice/20 border-t-magic-ice rounded-full animate-spin"></div>
+                    <div class="absolute inset-0 flex items-center justify-center animate-pulse"><i class="fa-solid fa-khanda text-4xl text-white"></i></div>
+                </div>
+                <p class="text-lg tracking-widest text-glow animate-pulse">騎士團集結中...</p>
+            </div>
+        </transition>
+
+        <div v-else class="flex flex-col h-full w-full overflow-hidden">
+            
+            <header class="glass-panel px-3 py-1 flex justify-between items-center z-20 shrink-0 border-b-0 rounded-b-3xl mx-2 mt-0">
+                <div class="flex items-center gap-2 overflow-hidden flex-1 mr-2">
+                    <div class="w-10 h-10 rounded-full border border-magic-ice/40 flex items-center justify-center bg-black/30 relative shrink-0 animate-spin-slow shadow-[0_0_10px_rgba(165,243,252,0.3)]">
+                        <div class="absolute inset-0 border border-white/10 rounded-full"></div>
+                        <i :class="headerIcon" class="text-magic-ice text-base"></i>
+                    </div>
+                    <div class="flex flex-col sm:flex-row sm:items-baseline sm:gap-2 min-w-0">
+                        <h1 class="text-sm font-bold text-white tracking-wider whitespace-nowrap text-glow">{{ headerTitle }}</h1>
+                        <span class="text-[16px] text-cyan-200 font-cursive leading-none truncate relative top-[2px]">{{ headerSubtitle }}</span>
+                    </div>
+                </div>
+                <div @click="toggleAI" class="flex items-center gap-1 shrink-0 active:scale-95 transition-transform">
+                    <span class="text-[12px] text-magic-ice/80 font-bold tracking-tight">召喚使魔</span>
+                    <div class="w-8 h-8 rounded-full border border-magic-ice/30 flex items-center justify-center bg-white/5 active:bg-magic-ice/20 transition-colors">
+                        <i class="fa-solid fa-cat text-white text-xs"></i>
+                    </div>
+                </div>
+            </header>
+
+            <main class="flex-1 flex flex-col min-h-0 mt-0 relative">
+                
+                <!-- 日誌 -->
+                <div v-if="currentTab === 'journal'" class="flex flex-col h-full min-h-0">
+                    <section class="mt-1 px-4 shrink-0">
+                        <div class="flex items-center gap-2 mb-1 pl-4">
+                            <i class="fa-solid fa-star-of-david text-[13px] text-cyan-200 animate-pulse"></i>
+                            <span class="text-[13px] text-cyan-200 font-bold tracking-widest text-shadow-sm">星象廳觀測報告</span>
+                        </div>
+                        <div class="flex gap-2 overflow-x-auto no-scrollbar pb-1 snap-x">
+                            <div v-for="w in weatherForecast" :key="w.date" 
+                                 class="snap-start shrink-0 w-16 h-16 glass-panel rounded-xl flex flex-col items-center justify-center gap-0 hover:bg-black/40 transition-colors relative overflow-hidden">
+                                <span class="text-[10px] text-gray-300 font-sans tracking-wide font-bold leading-none mt-1">{{ w.date }}</span>
+                                <i :class="w.icon" class="text-base my-0.5 drop-shadow-md"></i>
+                                <div class="flex items-center gap-0.5 text-[10px] font-bold text-white leading-none mb-1">
+                                    <span class="text-blue-300">{{ w.low }}</span><span class="text-gray-500">/</span><span class="text-red-300">{{ w.high }}</span>
+                                </div>
+                                <div class="absolute -top-4 -right-4 w-6 h-6 bg-magic-ice/10 rounded-full blur-lg"></div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <div class="shrink-0 py-1.5 px-4 overflow-x-auto no-scrollbar flex gap-2 snap-x">
+                        <div v-for="(day, index) in days" :key="index" @click="selectDay(day.date)"
+                             class="snap-start shrink-0 w-14 h-13 rounded-xl border flex flex-col items-center justify-center transition-all duration-300 relative overflow-hidden group cursor-pointer"
+                             :class="selectedDate === day.date ? 'bg-magic-ice/20 border-magic-ice shadow-[0_0_15px_rgba(165,243,252,0.2)]' : 'bg-black/30 border-white/10'">
+                            <span class="text-xs font-bold z-10 font-sans leading-none" :class="selectedDate === day.date ? 'text-white' : 'text-gray-300'">{{ day.week }}</span>
+                            <span class="text-base font-bold z-10 leading-none mt-0.5" :class="selectedDate === day.date ? 'text-cyan-300' : 'text-white'">{{ day.day }}</span>
+                        </div>
+                    </div>
+
+                    <div class="px-5 py-0 text-left shrink-0 mb-1">
+                        <h2 class="text-white drop-shadow-md flex items-center justify-start gap-2 flex-wrap">
+                            <span class="font-cursive text-2xl text-magic-ice leading-none mt-0">{{ getChapterTitle(selectedDate) }}</span>
+                            <span class="font-serif text-sm font-bold tracking-wide mt-1">{{ getChapterSubtitle(selectedDate) }}</span>
+                        </h2>
+                    </div>
+
+                    <div class="flex-1 scroller px-4 pb-24" id="itinerary-list">
+                        <div v-if="currentEvents.length === 0" class="flex flex-col items-center justify-center py-16 text-gray-400">
+                            <i class="fa-solid fa-scroll text-3xl mb-3 opacity-50"></i><p class="text-sm">尚未記載冒險...</p>
+                        </div>
+                        <div v-for="event in currentEvents" :key="event.id" :data-id="event.id" @click="editEvent(event)"
+                             class="relative pl-5 mb-4 group cursor-pointer active:scale-[0.99] transition-transform touch-manipulation">
+                            <div class="absolute left-0 top-3 bottom-0 w-[2px] bg-gradient-to-b from-magic-ice/30 to-transparent"></div>
+                            <div class="absolute -left-[5px] top-3 w-3 h-3 rounded-full bg-magic-dark border-2 border-magic-ice shadow-[0_0_8px_rgba(165,243,252,0.5)]"></div>
+                            <div class="glass-panel rounded-2xl p-3 border-l-[3px]" :class="getCategoryColor(event.type)">
+                                <div class="flex justify-between items-start mb-1">
+                                    <span class="text-[11px] font-mono text-magic-ice bg-black/40 px-1.5 py-0.5 rounded-md">{{ event.time }}</span>
+                                    <i :class="getCategoryIcon(event.type)" class="text-gray-400 text-xs opacity-50"></i>
+                                </div>
+                                <h3 class="text-base font-bold text-white mb-1 leading-snug">{{ event.title }}</h3>
+                                <p class="text-xs text-gray-300 leading-relaxed font-light whitespace-pre-line">{{ event.desc }}</p>
+                                <div v-if="event.link" class="mt-2">
+                                    <a :href="event.link" target="_blank" @click.stop class="inline-flex items-center gap-2 text-[10px] bg-magic-ice/10 text-magic-ice px-3 py-1.5 rounded-xl border border-magic-ice/20 active:bg-magic-ice/30 transition-colors">
+                                        <i class="fa-solid fa-link"></i> {{ event.linkText || '傳送門' }}
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <button @click="openAddModal" class="absolute bottom-20 right-5 w-12 h-12 rounded-full bg-gradient-to-br from-magic-ice to-cyan-600 text-magic-dark shadow-[0_8px_20px_rgba(165,243,252,0.4)] flex items-center justify-center text-xl active:scale-90 transition-transform z-30 border-2 border-white/20">
+                        <i class="fa-solid fa-plus"></i>
+                    </button>
+                </div>
+
+                <!-- 公會 -->
+                <div v-else-if="currentTab === 'guild'" class="flex flex-col h-full min-h-0 font-serif">
+                    <div class="px-4 py-2 shrink-0 flex gap-2">
+                        <button v-for="sub in guildTabs" :key="sub.id" @click="guildSubTab = sub.id"
+                            class="flex-1 py-2 rounded-xl border flex items-center justify-center gap-2 transition-all duration-300"
+                            :class="guildSubTab === sub.id ? 'bg-magic-ice/20 border-magic-ice text-white shadow-[0_0_10px_rgba(165,243,252,0.2)]' : 'bg-black/20 border-white/10 text-gray-400'">
+                            <i :class="sub.icon"></i>
+                            <span class="text-xs font-bold tracking-widest">{{ sub.label }}</span>
+                        </button>
+                    </div>
+
+                    <div v-if="guildSubTab === 'castle'" class="flex-1 scroller px-4 pb-24 animate-fade-in">
+                        <div class="mb-4 text-center mt-2">
+                            <h3 class="text-xl text-magic-ice font-cursive">The Demon King's Castles</h3>
+                            <p class="text-[10px] text-gray-400 tracking-widest">歷史與權力的具現化</p>
+                        </div>
+                        <div v-for="castle in guildData.castles" :key="castle.name" class="glass-panel rounded-2xl p-4 mb-4 relative overflow-hidden group border border-white/10">
+                            <div class="absolute top-0 right-0 p-2 opacity-10 group-hover:opacity-20 transition-opacity">
+                                <i class="fa-brands fa-fort-awesome text-6xl text-white"></i>
+                            </div>
+                            <h4 class="text-lg font-bold text-white mb-1 flex items-center gap-2">
+                                <i class="fa-solid fa-chess-rook text-magic-ice"></i> {{ castle.name }}
+                            </h4>
+                            <div class="text-xs text-gray-300 leading-relaxed mb-3 font-light text-justify">{{ castle.desc }}</div>
+                            <div class="bg-black/30 rounded-lg p-2 mb-3">
+                                <div class="flex items-start gap-2 mb-1">
+                                    <i class="fa-solid fa-circle-exclamation text-yellow-400 text-[10px] mt-0.5"></i>
+                                    <p class="text-[10px] text-gray-400">{{ castle.tips }}</p>
+                                </div>
+                                <div class="flex items-start gap-2">
+                                    <i class="fa-solid fa-camera text-pink-400 text-[10px] mt-0.5"></i>
+                                    <p class="text-[10px] text-gray-400">{{ castle.photo }}</p>
+                                </div>
+                            </div>
+                            <a :href="castle.map" target="_blank" class="block w-full py-2 bg-white/10 hover:bg-magic-ice/20 border border-white/20 rounded-xl text-center text-xs text-white transition-colors">
+                                <i class="fa-solid fa-location-arrow mr-1"></i> 開啟傳送門
+                            </a>
+                        </div>
+                    </div>
+
+                    <div v-else-if="guildSubTab === 'labyrinth'" class="flex-1 flex flex-col min-h-0 animate-fade-in">
+                        <div class="px-4 pb-2 overflow-x-auto no-scrollbar flex gap-2 shrink-0">
+                            <button v-for="layer in guildData.labyrinth" :key="layer.id" @click="selectedLayer = layer.id"
+                                class="px-3 py-1.5 rounded-full border text-[11px] font-bold whitespace-nowrap transition-all"
+                                :class="selectedLayer === layer.id ? 'bg-white text-magic-dark border-white' : 'bg-black/30 text-gray-400 border-white/10'">
+                                {{ layer.name }}
+                            </button>
+                        </div>
+                        <div class="flex-1 scroller px-4 pb-24 relative">
+                            <div v-if="currentLayerData" class="animate-fade-in">
+                                <div class="glass-panel rounded-2xl p-4 mb-4 border-l-4" :class="currentLayerData.colorClass">
+                                    <h3 class="text-xl font-bold text-white mb-1">{{ currentLayerData.title }}</h3>
+                                    <p class="text-xs text-magic-ice font-bold tracking-wider mb-2">{{ currentLayerData.rpgTitle }}</p>
+                                    <p class="text-xs text-gray-300 leading-relaxed">{{ currentLayerData.desc }}</p>
+                                </div>
+                                <div class="space-y-4">
+                                    <div v-for="(spot, idx) in currentLayerData.spots" :key="idx" 
+                                         class="bg-black/20 rounded-xl p-3 border border-white/5 relative">
+                                        <div class="flex justify-between items-start mb-2">
+                                            <h4 class="text-sm font-bold text-white"><span class="mr-2 opacity-70">{{ idx + 1 }}.</span>{{ spot.name }}</h4>
+                                            <a :href="spot.map" target="_blank" class="w-6 h-6 rounded-full bg-white/10 flex items-center justify-center text-magic-ice hover:bg-white/20">
+                                                <i class="fa-solid fa-location-arrow text-[10px]"></i>
+                                            </a>
+                                        </div>
+                                        <ul v-if="spot.items" class="space-y-1.5">
+                                            <li v-for="item in spot.items" :key="item" class="text-[11px] text-gray-400 flex items-start gap-1.5 pl-1 border-l border-white/10">
+                                                <span class="text-white/60">▪</span> {{ item }}
+                                            </li>
+                                        </ul>
+                                        <p v-else class="text-[11px] text-gray-400 pl-1">{{ spot.desc }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div v-else-if="guildSubTab === 'kyoto'" class="flex-1 flex flex-col min-h-0 animate-fade-in">
+                        <div class="px-4 pb-2 flex gap-2 shrink-0 justify-center">
+                            <button v-for="layer in guildData.kyoto" :key="layer.id" @click="selectedKyotoLayer = layer.id"
+                                class="flex-1 py-1.5 rounded-full border text-[11px] font-bold whitespace-nowrap transition-all text-center"
+                                :class="selectedKyotoLayer === layer.id ? 'bg-white text-magic-dark border-white' : 'bg-black/30 text-gray-400 border-white/10'">
+                                {{ layer.name }}
+                            </button>
+                        </div>
+
+                        <div class="flex-1 scroller px-4 pb-24 relative">
+                            <div v-if="currentKyotoData" class="animate-fade-in">
+                                <div class="glass-panel rounded-2xl p-4 mb-4 border-l-4" :class="currentKyotoData.colorClass">
+                                    <h3 class="text-xl font-bold text-white mb-1">{{ currentKyotoData.title }}</h3>
+                                    <p class="text-xs text-magic-ice font-bold tracking-wider mb-2">{{ currentKyotoData.rpgTitle }}</p>
+                                    <div v-if="currentKyotoData.intro && currentKyotoData.intro.length" class="space-y-3 mt-3">
+                                        <div v-for="(intro, i) in currentKyotoData.intro" :key="i" class="text-xs text-gray-300 leading-relaxed">
+                                            <p class="font-bold text-white mb-1">▪ {{ intro.title }}</p>
+                                            <p class="pl-2 border-l-2 border-white/10">{{ intro.desc }}</p>
+                                        </div>
+                                    </div>
+                                    <p v-else class="text-xs text-gray-300 leading-relaxed">{{ currentKyotoData.desc }}</p>
+                                </div>
+
+                                <div v-if="currentKyotoData.zones" class="mb-6">
+                                    <h4 class="text-sm font-bold text-magic-ice mb-3 border-b border-white/10 pb-1">主要地標</h4>
+                                    <div v-for="(zone, idx) in currentKyotoData.zones" :key="idx" class="bg-black/20 rounded-xl p-3 border border-white/5 mb-3">
+                                        <div class="flex justify-between items-start mb-1">
+                                            <h5 class="text-sm font-bold text-white">{{ zone.name }}</h5>
+                                            <span class="text-[10px] text-gray-400">{{ zone.title }}</span>
+                                        </div>
+                                        <div class="space-y-1">
+                                            <p v-for="p in zone.subPoints" :key="p" class="text-[11px] text-gray-300 pl-2 border-l border-magic-ice/30">{{ p }}</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="space-y-4">
+                                    <h4 class="text-sm font-bold text-magic-ice mb-2 border-b border-white/10 pb-1">據點列表</h4>
+                                    <div v-for="(spot, idx) in currentKyotoData.spots" :key="idx" class="bg-black/20 rounded-xl p-3 border border-white/5 relative">
+                                        <div class="flex justify-between items-start mb-2">
+                                            <div>
+                                                <h4 class="text-sm font-bold text-white">{{ spot.name }}</h4>
+                                                <span class="text-[10px] text-magic-ice block">{{ spot.rpgName }}</span>
+                                            </div>
+                                            <a :href="spot.map" target="_blank" class="w-6 h-6 rounded-full bg-white/10 flex items-center justify-center text-magic-ice hover:bg-white/20">
+                                                <i class="fa-solid fa-location-arrow text-[10px]"></i>
+                                            </a>
+                                        </div>
+                                        <p class="text-[11px] text-gray-400 leading-relaxed">{{ spot.desc }}</p>
+                                        <p class="text-[10px] text-yellow-200/80 mt-1 pl-1 border-l-2 border-yellow-500/50" v-if="spot.bonus">Bonus: {{ spot.bonus }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 補給：迷宮飯◆大阪 / 靈脈礦石◇京都 -->
+                <div v-else-if="currentTab === 'supply'" class="flex flex-col h-full min-h-0 font-serif">
+                    <!-- 分頁按鈕 -->
+                    <div class="px-4 pt-3 pb-2 flex gap-3 overflow-x-auto no-scrollbar shrink-0">
+                        <button
+                            v-for="tab in supplyTabs"
+                            :key="tab.id"
+                            @click="supplySubTab = tab.id"
+                            class="relative flex-1 min-w-[140px] px-3 py-2 rounded-2xl border text-xs font-bold tracking-widest flex items-center justify-center gap-2 transition-all duration-300"
+                            :class="supplySubTab === tab.id
+                                ? 'bg-white/10 border-white/70 text-white shadow-[0_0_18px_rgba(255,255,255,0.55)] -translate-y-0.5'
+                                : 'bg-black/30 border-white/10 text-gray-400'">
+                            <!-- 柔和白光外圈 -->
+                            <div
+                                v-if="supplySubTab === tab.id"
+                                class="absolute inset-0 rounded-2xl pointer-events-none">
+                                <div class="absolute -inset-2 rounded-3xl bg-white/20 blur-xl opacity-80"></div>
+                            </div>
+                            <i :class="tab.icon" class="relative text-base"></i>
+                            <span class="relative whitespace-nowrap">{{ tab.label }}</span>
+                        </button>
+                    </div>
+
+                    <!-- 說明文字 -->
+                    <div class="px-5 pb-1 shrink-0 text-center">
+                        <p v-if="supplySubTab === 'osaka'" class="text-[11px] text-gray-300 leading-relaxed">
+                            迷宮飯：記錄大阪地下城的補給料理與便當道具，適合出發前規劃戰場糧食。
+                        </p>
+                        <p v-else class="text-[11px] text-gray-300 leading-relaxed">
+                            靈脈礦石：記錄京都妖都的礦石與護符素材，用來強化裝備與穩定靈脈。
+                        </p>
+                    </div>
+
+                    <!-- 補給列表（隱藏卷軸可滑動） -->
+                    <div class="flex-1 scroller no-scrollbar px-4 pb-24">
+                        <div class="mb-3 mt-1 text-center">
+                            <h3 class="text-lg font-cursive text-magic-ice">
+                                {{ supplySubTab === 'osaka' ? 'Labyrinth Meals' : 'Spirit Ores' }}
+                            </h3>
+                            <p class="text-[10px] text-gray-400 tracking-widest">
+                                {{ supplySubTab === 'osaka' ? '迷宮補給．體力與士氣來源' : '靈脈凝結．強化護符與防禦' }}
+                            </p>
+                        </div>
+
+                        <div v-if="currentSupplyList.length === 0" class="flex flex-col items-center justify-center py-10 text-gray-500">
+                            <i class="fa-solid" :class="supplySubTab === 'osaka' ? 'fa-bowl-rice' : 'fa-gem'" class="text-2xl mb-3"></i>
+                            <p class="text-xs">尚未記錄補給品...</p>
+                        </div>
+
+                        <div v-else class="space-y-3">
+                            <div
+                                v-for="(item, idx) in currentSupplyList"
+                                :key="idx"
+                                class="glass-panel rounded-2xl p-3 border border-white/10 relative overflow-hidden">
+                                
+                                <!-- 背景柔光 -->
+                                <div class="absolute -right-8 -top-10 w-24 h-24 rounded-full bg-white/5 blur-3xl opacity-60"></div>
+
+                                <div class="relative flex justify-between items-start mb-1">
+                                    <div>
+                                        <p class="text-[10px] text-gray-400 mb-0.5">
+                                            #{{ idx + 1 }} · {{ item.type }}
+                                        </p>
+                                        <h4 class="text-sm font-bold text-white leading-snug">
+                                            {{ item.name }}
+                                        </h4>
+                                    </div>
+                                    <div class="flex flex-col items-end gap-1">
+                                        <span class="text-[11px] text-magic-ice font-mono bg-black/40 px-2 py-0.5 rounded-full">
+                                            {{ item.price }}
+                                        </span>
+                                        <span class="text-[10px] text-gray-400" v-if="item.rarity">
+                                            {{ item.rarity }}
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <p class="relative text-[11px] text-gray-300 leading-relaxed mt-1 whitespace-pre-line">
+                                    {{ item.desc }}
+                                </p>
+
+                                <div class="relative mt-2 flex flex-wrap items-center justify-between gap-1 text-[10px]">
+                                    <span v-if="item.place" class="text-gray-400 flex items-center gap-1">
+                                        <i class="fa-solid fa-location-dot text-magic-ice/80"></i>
+                                        {{ item.place }}
+                                    </span>
+                                    <span v-if="item.note" class="text-yellow-200/90 flex items-center gap-1">
+                                        <i class="fa-solid fa-star"></i>
+                                        {{ item.note }}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 其它頁籤（暫留） -->
+                <div v-else class="flex-1 flex items-center justify-center text-gray-500">
+                    <p class="text-sm">功能開發中</p>
+                </div>
+            </main>
+
+            <!-- 底部導航列 -->
+            <nav class="fixed bottom-0 left-0 right-0 glass-panel border-t border-t-white/15 border-x-0 border-b-0 rounded-t-3xl flex justify-between px-8 items-center pt-1 pb-safe z-40 bg-[#0f172a]/95 backdrop-blur-xl h-[66px]">
+                <button v-for="tab in tabs" :key="tab.id" @click="currentTab = tab.id"
+                    class="relative flex flex-col items-center justify-center w-16 gap-0 transition-all duration-300 group"
+                    :class="currentTab === tab.id ? 'text-magic-ice' : 'text-gray-500 hover:text-gray-300'">
+                    <div class="relative transition-all duration-300" :class="currentTab === tab.id ? '-translate-y-0.5' : ''">
+                        <i :class="tab.icon" class="text-[26px] mb-0.5"></i>
+                        <div v-if="currentTab === tab.id" class="absolute -inset-2 bg-magic-ice/20 blur-lg rounded-full"></div>
+                    </div>
+                    <span class="text-[12px] font-medium tracking-wide transition-colors duration-300 leading-none" :class="currentTab === tab.id ? 'text-white' : 'text-gray-500 group-hover:text-gray-400'">{{ tab.label }}</span>
+                    <div v-if="currentTab === tab.id" class="absolute -bottom-1 w-1 h-1 bg-magic-ice rounded-full shadow-[0_0_8px_#a5f3fc]"></div>
+                </button>
+            </nav>
+        </div>
+
+        <!-- 新增 / 編輯 modal -->
+        <transition enter-active-class="transition duration-300 ease-out" enter-from-class="translate-y-full opacity-0" enter-to-class="translate-y-0 opacity-100" leave-active-class="transition duration-200 ease-in" leave-from-class="translate-y-0 opacity-100" leave-to-class="translate-y-full opacity-0">
+            <div v-if="isModalOpen" class="fixed inset-0 z-[60] flex flex-col justify-end">
+                <div @click="closeModal" class="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity"></div>
+                <div class="bottom-sheet w-full rounded-t-[2rem] p-6 relative z-10 animate-slide-up scroller">
+                    <div class="w-12 h-1.5 bg-gray-600 rounded-full mx-auto mb-6 opacity-50 shrink-0"></div>
+                    <div class="flex justify-between items-center mb-6 shrink-0">
+                        <h3 class="text-xl font-bold text-white flex items-center gap-2"><i class="fa-solid fa-feather-pointed text-magic-ice"></i> {{ modalMode === 'add' ? '撰寫新冒險' : '編修紀錄' }}</h3>
+                        <button @click="closeModal" class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-gray-400 active:bg-white/20"><i class="fa-solid fa-times"></i></button>
+                    </div>
+                    <div class="space-y-5">
+                        <div class="flex gap-4">
+                            <div class="w-1/3"><label class="text-xs text-magic-ice/70 ml-1 mb-1 block">時間</label><input v-model="editingEvent.time" type="text" placeholder="14:00" class="magic-input text-center font-mono"></div>
+                            <div class="w-2/3"><label class="text-xs text-magic-ice/70 ml-1 mb-1 block">標題</label><input v-model="editingEvent.title" type="text" placeholder="冒險名稱..." class="magic-input"></div>
+                        </div>
+                        <div>
+                            <label class="text-xs text-magic-ice/70 ml-1 mb-1 block">類別</label>
+                            <div class="flex gap-3 overflow-x-auto no-scrollbar py-1">
+                                <button v-for="type in eventTypes" :key="type.val" @click="editingEvent.type = type.val" class="px-4 py-2 rounded-full text-xs font-bold border transition-all shrink-0 flex items-center gap-2" :class="editingEvent.type === type.val ? 'bg-magic-ice text-magic-dark border-magic-ice' : 'bg-white/5 text-gray-400 border-white/10'"><i :class="type.icon"></i> {{ type.label }}</button>
+                            </div>
+                        </div>
+                        <div><label class="text-xs text-magic-ice/70 ml-1 mb-1 block">內容</label><textarea v-model="editingEvent.desc" rows="4" placeholder="輸入行程細節..." class="magic-input resize-none leading-relaxed"></textarea></div>
+                        <div><label class="text-xs text-magic-ice/70 ml-1 mb-1 block">連結 (選填)</label><div class="flex gap-2"><input v-model="editingEvent.link" type="text" placeholder="https://..." class="magic-input flex-1 text-xs"><input v-model="editingEvent.linkText" type="text" placeholder="按鈕文字" class="magic-input w-24 text-xs text-center"></div></div>
+                    </div>
+                    <div class="mt-8 mb-4 flex gap-3">
+                        <button v-if="modalMode === 'edit'" @click="handleDelete" class="flex-1 py-3.5 rounded-2xl border transition-all font-bold flex items-center justify-center gap-2 active:scale-95" :class="confirmDelete ? 'bg-magic-danger text-white border-magic-danger' : 'bg-transparent text-magic-danger border-magic-danger/30'"><i :class="confirmDelete ? 'fa-solid fa-triangle-exclamation' : 'fa-solid fa-trash'"></i> {{ confirmDelete ? '確定?' : '' }}</button>
+                        <button @click="saveEvent" class="flex-[2] bg-magic-ice text-magic-dark py-3.5 rounded-2xl font-bold text-lg shadow-[0_0_20px_rgba(165,243,252,0.4)] active:scale-95 transition-transform flex items-center justify-center gap-2"><i class="fa-solid fa-check"></i> 儲存</button>
+                    </div>
+                    <div class="h-48 w-full shrink-0"></div>
+                </div>
+            </div>
+        </transition>
+
+        <!-- 召喚使魔 modal -->
+        <div v-if="showChatModal" class="fixed inset-0 z-[60] flex items-center justify-center p-6 bg-black/80 backdrop-blur-sm animate-fade-in">
+            <div class="w-full max-w-sm glass-panel rounded-3xl p-6 relative bg-[#0f172a]">
+                <button @click="toggleAI" class="absolute top-4 right-4 text-white w-8 h-8 flex items-center justify-center rounded-full bg-white/10"><i class="fa-solid fa-times"></i></button>
+                <div class="text-center py-8">
+                    <div class="w-16 h-16 rounded-full bg-indigo-900 border-2 border-magic-ice mx-auto mb-4 flex items-center justify-center shadow-[0_0_15px_#a5f3fc]"><i class="fa-solid fa-cat text-2xl text-white"></i></div>
+                    <h3 class="text-xl font-bold text-white mb-2">使魔 Gemini</h3><p class="text-gray-400 text-sm">喵... API 尚未連結。</p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        const { createApp, ref, computed, onMounted, nextTick, watch } = Vue;
+
+        createApp({
+            setup() {
+                const isLoading = ref(true);
+                const currentTab = ref('journal');
+                const guildSubTab = ref('castle'); // 公會分頁
+                const selectedLayer = ref('layer1'); // 大阪迷宮層級
+                const selectedKyotoLayer = ref('layer1'); // 京都靈脈層級
+                const selectedDate = ref('2025-12-14');
+                const showChatModal = ref(false);
+                const isModalOpen = ref(false);
+                const modalMode = ref('add');
+                const confirmDelete = ref(false);
+                
+                const editingEvent = ref({ id: null, time: '', title: '', desc: '', type: 'sightseeing', link: '', linkText: '' });
+
+                const headerTitle = computed(() => {
+                    if (currentTab.value === 'journal') return '騎士團討伐魔王遠征隊';
+                    if (currentTab.value === 'guild') return '公會情報分析';
+                    if (currentTab.value === 'supply') return '補給庫：迷宮飯與靈脈礦石';
+                    return '騎士團遠征系統';
+                });
+                const headerSubtitle = computed(() => {
+                    if (currentTab.value === 'journal') return 'The Osaka and Kyoto Journey';
+                    if (currentTab.value === 'guild') return 'Guild Intelligence Center';
+                    if (currentTab.value === 'supply') return 'Supply Archive & Field Rations';
+                    return 'Adventure Management';
+                });
+                const headerIcon = computed(() => {
+                    if (currentTab.value === 'journal') return 'fa-solid fa-dragon';
+                    if (currentTab.value === 'guild') return 'fa-solid fa-book-atlas';
+                    if (currentTab.value === 'supply') return 'fa-solid fa-box-archive';
+                    return 'fa-solid fa-scroll';
+                });
+
+                const days = [
+                    { date: '2025-12-14', day: '14', week: 'SUN', chapter: 'Chapter 1', subtitle: '：異界之門開啟' },
+                    { date: '2025-12-15', day: '15', week: 'MON', chapter: 'Chapter 2', subtitle: '：白鷺與達摩的試煉' },
+                    { date: '2025-12-16', day: '16', week: 'TUE', chapter: 'Chapter 3', subtitle: '：靈山水脈與神靈結界巡禮' },
+                    { date: '2025-12-17', day: '17', week: 'WED', chapter: 'Chapter 4', subtitle: '：主隊、分隊合流冒險小隊的休日' },
+                    { date: '2025-12-18', day: '18', week: 'THU', chapter: 'Chapter 5', subtitle: '：回憶神殿與鳳凰之光' },
+                    { date: '2025-12-19', day: '19', week: 'FRI', chapter: 'Chapter 6', subtitle: '：最終饗宴。鳥貴族慶功' },
+                    { date: '2025-12-20', day: '20', week: 'SAT', chapter: 'Chapter 7', subtitle: '：帶回名為「回憶」與「寶藏」的詩篇' },
+                ];
+
+                const eventTypes = [
+                    { val: 'sightseeing', label: '景點', icon: 'fa-solid fa-mountain-sun' },
+                    { val: 'transport', label: '移動', icon: 'fa-solid fa-train-subway' },
+                    { val: 'food', label: '美食', icon: 'fa-solid fa-utensils' },
+                    { val: 'shop', label: '購物', icon: 'fa-solid fa-bag-shopping' },
+                    { val: 'hotel', label: '住宿', icon: 'fa-solid fa-bed' },
+                    { val: 'ticket', label: '門票', icon: 'fa-solid fa-ticket' },
+                ];
+
+                // 公會資料
+                const guildTabs = [
+                    { id: 'castle', label: '魔王城', icon: 'fa-brands fa-fort-awesome' },
+                    { id: 'labyrinth', label: '大阪迷宮', icon: 'fa-solid fa-dungeon' },
+                    { id: 'kyoto', label: '京都靈脈', icon: 'fa-solid fa-torii-gate' }
+                ];
+
+                const guildData = {
+                    castles: [
+                        { name: '姬路城 (Himeji Castle)', desc: '別名「白鷺城」。擁有極高物理防禦力的白色巨型要塞，其迷宮般的防禦結構曾讓無數敵軍迷失。是武士時代遺留的最高階神聖遺產。', tips: '攻城戰需消耗大量體力，階梯陡峭請裝備「舒適戰靴」。', photo: '大天守閣正下方仰角、西之丸庭園遠眺。', map: 'https://www.google.com/maps/search/?api=1&query=Himeji+Castle' },
+                        { name: '二條城 (Nijo Castle)', desc: '德川幕府在京都的權力象徵。擁有特殊機關「鶯聲地板」，能發出鳥鳴警報以防忍者入侵。內部藏有狩野派繪製的華麗障壁畫卷。', tips: '室內禁止攝影，請用心靈之眼紀錄。', photo: '唐門的金箔雕刻、二之丸庭園。', map: 'https://www.google.com/maps/search/?api=1&query=Nijo+Castle' },
+                        { name: '京都御所 (Kyoto Imperial Palace)', desc: '舊皇族居住的神聖領域，結界感強烈。雖然沒有高聳城牆，但廣大的碎石路考驗著冒險者的耐心與鞋底。', tips: '佔地極廣，建議預留充裕時間進行迴避移動。', photo: '紫宸殿的朱紅色迴廊。', map: 'https://www.google.com/maps/search/?api=1&query=Kyoto+Imperial+Palace' }
+                    ],
+                    labyrinth: [
+                        { id: 'layer1', name: '第一層：難波', title: '難波 (Namba)', rpgTitle: '【人類聚集地】', colorClass: 'border-l-blue-400', desc: '迷宮的起點與物資集散地。人流混雜，擁有最強大的電器軍火庫與轉運樞紐。', spots: [
+                            { name: 'EDION 愛電王 難波店', desc: '裝備庫', map: 'https://www.google.com/maps/search/?api=1&query=EDION+Namba', items: ['實惠的 Apple 手機/平板/筆電 (匯率優勢)', '各類電子護符'] },
+                            { name: 'BicCamera 難波店', desc: '大型軍火庫', map: 'https://www.google.com/maps/search/?api=1&query=BicCamera+Namba', items: ['風屬性法杖：Panasonic 吹風機', '風暴神器：Dyson Supersonic', '回春儀式道具：Panasonic 美容儀', '心靈通訊器：Sony/Bose 無線耳機', '次元收納箱：LOJEL 行李箱', '精密計時器：日製手錶', '熱源保存瓶：虎牌保溫瓶', '鍊金電子鍋：象印', '記憶封存板：FUJIFILM 拍立得'] }
+                        ]},
+                        { id: 'layer2', name: '第二層：心齋橋', title: '心齋橋筋 + 道頓堀', rpgTitle: '【獸族領地】', colorClass: 'border-l-orange-500', desc: '充滿慾望與霓虹燈光的繁華領域，巨型招牌如同神獸般俯瞰著冒險者。', spots: [
+                            { name: '固力果跑跑人', desc: '地下城大 BOSS (必拍地標)', map: 'https://www.google.com/maps/search/?api=1&query=Glico+Man+Sign' },
+                            { name: '大丸心齋橋百貨', desc: '獸族交易大殿 (華麗哥德風建築)', map: 'https://www.google.com/maps/search/?api=1&query=Daimaru+Shinsaibashi' },
+                            { name: '心齋橋 PARCO', desc: '多層幻境商城 (潮牌/動漫)', map: 'https://www.google.com/maps/search/?api=1&query=Shinsaibashi+PARCO' },
+                            { name: '惠比壽塔摩天輪', desc: '地下城小 BOSS (黃色迴轉塔)', map: 'https://www.google.com/maps/search/?api=1&query=Don+Quijote+Dotonbori' }
+                        ]},
+                        { id: 'layer3', name: '第三層：日本橋', title: '日本橋商圈', rpgTitle: '【魔族地盤】', colorClass: 'border-l-purple-500', desc: '魔力密度極高的區域，販售禁忌的魔道書(漫畫)、魔像(模型)與稀有卡牌。', spots: [
+                            { name: 'Animate 大阪日本橋', desc: '魔導書類圖書館', map: 'https://www.google.com/maps/search/?api=1&query=Animate+Osaka+Nipponbashi' },
+                            { name: '駿河屋 本館', desc: '二手聖遺物寶庫', map: 'https://www.google.com/maps/search/?api=1&query=Surugaya+Osaka+Nipponbashi' },
+                            { name: 'SUPER KIDS LAND', desc: '機巧兵團總部 (模型)', map: 'https://www.google.com/maps/search/?api=1&query=Super+Kids+Land+Main+Store' },
+                            { name: 'JUNGLE 總店', desc: '特攝與機甲魔像交易所', map: 'https://www.google.com/maps/search/?api=1&query=Jungle+Osaka+Nipponbashi' }
+                        ]},
+                        { id: 'layer4', name: '第四層：梅田', title: '梅田 (Umeda)', rpgTitle: '【精靈族領地】', colorClass: 'border-l-emerald-400', desc: '高聳入雲的玻璃巨塔森林，充滿高級感與秩序，是高階冒險者出沒之地。', spots: [
+                            { name: 'GRAND FRONT OSAKA', desc: '精靈王庭 (北館/南館)', map: 'https://www.google.com/maps/search/?api=1&query=Grand+Front+Osaka' },
+                            { name: 'LUCUA / LUCUA 1100', desc: '時尚精靈市集', map: 'https://www.google.com/maps/search/?api=1&query=LUCUA+Osaka' },
+                            { name: 'Yodobashi 梅田', desc: '精靈科技要塞', map: 'https://www.google.com/maps/search/?api=1&query=Yodobashi+Camera+Multimedia+Umeda' },
+                            { name: '大丸梅田店', desc: '任天堂與寶可夢中心所在地', map: 'https://www.google.com/maps/search/?api=1&query=Daimaru+Umeda' },
+                            { name: 'KITTE 大阪', desc: '新開啟的白之塔', map: 'https://www.google.com/maps/search/?api=1&query=KITTE+Osaka' }
+                        ]},
+                        { id: 'layer5', name: '第五層：地下街', title: '梅田地下迷宮', rpgTitle: '【黑暗精靈領地・顛倒世界】', colorClass: 'border-l-slate-500', desc: '號稱「新手殺手」的複雜地下網絡。高濃度魔素(人流)匯集成河，容易迷失方向。', spots: [
+                            { name: '阪急三番街', desc: 'Kiddy Land 玩具巢穴', map: 'https://www.google.com/maps/search/?api=1&query=Hankyu+Sanbangai' },
+                            { name: 'UMEDA FOOD HALL', desc: '地下補給大廳', map: 'https://www.google.com/maps/search/?api=1&query=UMEDA+FOOD+HALL' },
+                            { name: 'DIAMOR OSAKA', desc: '大理石迴廊', map: 'https://www.google.com/maps/search/?api=1&query=Diamor+Osaka' },
+                            { name: 'Whity 梅田', desc: '白之地下道', map: 'https://www.google.com/maps/search/?api=1&query=Whity+Umeda' }
+                        ]},
+                        { id: 'layer6', name: '第六層：天王寺', title: '天王寺・阿倍野', rpgTitle: '【神界】', colorClass: 'border-l-yellow-500', desc: '擁有全日本最高的結界塔，是距離天空最近的區域，同時保留著昭和時代的混沌感。', spots: [
+                            { name: '天王寺動物園', desc: '神獸以此為家', map: 'https://www.google.com/maps/search/?api=1&query=Tennoji+Zoo' },
+                            { name: '通天閣', desc: '舊時代的神之塔', map: 'https://www.google.com/maps/search/?api=1&query=Tsutenkaku' },
+                            { name: '阿倍野 HARUKAS 300', desc: '天空迴廊 (絕景展望台)', map: 'https://www.google.com/maps/search/?api=1&query=Abeno+Harukas+300' },
+                            { name: '新世界本通商店街', desc: '下町神界 (串炸聖地)', map: 'https://www.google.com/maps/search/?api=1&query=Shinsekai+Hondori' }
+                        ]},
+                        { id: 'special', name: '特殊點', title: '隱藏支線', rpgTitle: '【特殊能力獲取點】', colorClass: 'border-l-pink-500', desc: '散落在迷宮各處的特殊祭壇與工坊，可獲得強力 Buff。', spots: [
+                            { name: '難波八阪神社', desc: '巨大獅頭神殿：釋放強烈「厄除吼叫」，驅散霉運。', map: 'https://www.google.com/maps/search/?api=1&query=Namba+Yasaka+Shrine' },
+                            { name: '法善寺', desc: '水掛不動明王：長滿青苔的尊者，給予「心願成就」加護。', map: 'https://www.google.com/maps/search/?api=1&query=Hozenji+Temple' },
+                            { name: '四天王寺', desc: '古代聖域：強大的魔力回復點，適合淨化身心。', map: 'https://www.google.com/maps/search/?api=1&query=Shitennoji' },
+                            { name: '千日前道具街', desc: '矮人鐵匠街：販售各種廚具神器的工坊聚落。', map: 'https://www.google.com/maps/search/?api=1&query=Sennichimae+Doguyasuji' }
+                        ]}
+                    ],
+                    kyoto: [
+                        {
+                            id: 'layer1', name: '第一層：礦脈', title: '礦脈 (Mineral Vein)', rpgTitle: '【妖都之心・經濟魔力引擎】', colorClass: 'border-l-indigo-500',
+                            intro: [
+                                { title: '區域情報：妖都的心臟', desc: '這裡是京都靈脈最粗大的主脈線，表面上是購物天堂，實際上是妖族吸取人類「經濟魔力」的巨大引擎。規矩只有一條：「付出金錢，就能獲得慾望的滿足」。' },
+                                { title: '1. 京都車站 (妖族入境管理局)', desc: '巨大的靈力掃描網。大階梯是數據散熱片，京都塔是全域監視眼。' },
+                                { title: '2. 四條河原町 (慾望十字路)', desc: '狐妖經營的百貨商圈，商品常附帶魅惑魔法。鴨川是天然結界，岸邊情侶可能有非人存在。' },
+                                { title: '3. 新京極商店街 (時空縫隙)', desc: '付喪神與狸貓聚集的古老遊樂場，時間流速與外界不同，夾雜的神社是鎮壓靈脈的安全閥。' },
+                                { title: '4. 錦市場 (煉金廚房)', desc: '妖族藥劑師與人類廚師切磋之地。彩色天頂是人造白晝結界。特色小吃如玉子燒、豆乳甜甜圈皆可恢復 HP。' }
+                            ],
+                            spots: [
+                                { name: '京都高島屋', rpgName: '財祿狐商會總部', desc: '館內暗藏「財祿流」，玩家可獲得金運符。', map: 'https://www.google.com/maps/search/?api=1&query=京都高島屋', bonus: '金運提升' },
+                                { name: '京都大丸', rpgName: '衣紋妖的織氣塔', desc: '纖維靈感應旅人情緒，被選中的服飾會格外亮眼。', map: 'https://www.google.com/maps/search/?api=1&query=大丸京都店', bonus: '魅力增益' },
+                                { name: '唐吉軻德', rpgName: '混沌迷宮市集', desc: '混沌妖族聚集，通道會微妙改變，引導旅人找到剛好需要的物品。', map: 'https://www.google.com/maps/search/?api=1&query=唐吉軻德京都', bonus: '隨機道具' },
+                                { name: 'Kiddy Land', rpgName: '夢境族的玩偶棲所', desc: '由夢靈維護，玩偶帶有微弱生命感。', map: 'https://www.google.com/maps/search/?api=1&query=Kiddy+Land+Kyoto', bonus: '心靈療癒' },
+                                { name: 'BAL', rpgName: '書靈靈感基地', desc: '承載強大思緒流，是精神調律的最佳地點。', map: 'https://www.google.com/maps/search/?api=1&query=京都BAL', bonus: '靈感碎片' },
+                                { name: '京都 LOFT', rpgName: '付喪神多層棲地', desc: '住著年輕付喪神，小物會主動吸引旅人視線。', map: 'https://www.google.com/maps/search/?api=1&query=京都LOFT', bonus: '生活道具' },
+                                { name: '京都伊勢丹', rpgName: '旅人守護的貴族領', desc: '高階守護妖族視為旅客保護區，動線異常順暢。', map: 'https://www.google.com/maps/search/?api=1&query=JR京都伊勢丹', bonus: '旅途護符' },
+                                { name: 'AEON MALL Kyoto', rpgName: '地底族的休息領域', desc: '建在次級礦脈上，氣場溫和，適合穩定心神。', map: 'https://www.google.com/maps/search/?api=1&query=AEON+MALL+Kyoto', bonus: '體力恢復' }
+                            ]
+                        },
+                        {
+                            id: 'layer2', name: '第二層：靈脈', title: '靈脈 (Spiritual Vein)', rpgTitle: '【古老結界・神靈棲息地】', colorClass: 'border-l-red-500',
+                            desc: '遠離塵囂的古老力量源頭，是與神靈締結契約的場所。',
+                            spots: [
+                                { name: '貴船神社', rpgName: '水龍與契約之社', desc: '水氣最濃之處，水占籤被視為最誠實的占兆。', map: 'https://www.google.com/maps/search/?api=1&query=貴船神社', bonus: '契約儀式' },
+                                { name: '龍安寺', rpgName: '石靈靜坐的無聲庭', desc: '石庭承載千年氣息，是靈庭刻意的修行方式。', map: 'https://www.google.com/maps/search/?api=1&query=龍安寺', bonus: '感知提升' },
+                                { name: '晴明神社', rpgName: '陰陽師遺跡', desc: '安倍晴明的結界核心，符籙具有增幅效果。', map: 'https://www.google.com/maps/search/?api=1&query=晴明神社', bonus: '術式解謎' },
+                                { name: '御金神社', rpgName: '金龍巢域', desc: '聚集最強金運流，金色鳥居如能量導管。', map: 'https://www.google.com/maps/search/?api=1&query=御金神社', bonus: '金氣試煉' },
+                                { name: '靈光殿天滿宮', rpgName: '學識之光的記憶社', desc: '強大的思念場域，文字紙張帶有微弱靈光。', map: 'https://www.google.com/maps/search/?api=1&query=靈光殿天滿宮', bonus: '記憶強化' },
+                                { name: '清水寺', rpgName: '幻術工坊街', desc: '付喪神與工藝妖共存，夕陽後偶有懸空夜市。', map: 'https://www.google.com/maps/search/?api=1&query=清水寺', bonus: '工匠試煉' },
+                                { name: '伏見稻荷大社', rpgName: '妖狐商業區', desc: '千本鳥居是通往狐族市場的門戶。', map: 'https://www.google.com/maps/search/?api=1&query=伏見稻荷大社', bonus: '支線交易' },
+                                { name: '金閣寺', rpgName: '光耀結界', desc: '聚集太陽靈能，湖面倒影是反射靈的視窗。', map: 'https://www.google.com/maps/search/?api=1&query=金閣寺', bonus: '精神抗性' },
+                                { name: '平安神宮', rpgName: '大域調和宮', desc: '京都結界的重要節點，水道能調整旅人能量。', map: 'https://www.google.com/maps/search/?api=1&query=平安神宮', bonus: '調和加護' }
+                            ]
+                        }
+                    ]
+                };
+
+                const currentLayerData = computed(() => guildData.labyrinth.find(l => l.id === selectedLayer.value));
+                const currentKyotoData = computed(() => guildData.kyoto.find(l => l.id === selectedKyotoLayer.value));
+
+                // 補給分頁：迷宮飯 / 靈脈礦石
+                const supplySubTab = ref('osaka');
+                const supplyTabs = [
+                    { id: 'osaka', label: '迷宮飯◆大阪', icon: 'fa-solid fa-bowl-rice' },
+                    { id: 'kyoto', label: '靈脈礦石◇京都', icon: 'fa-solid fa-gem' }
+                ];
+
+                const supplyData = {
+                    osaka: [
+                        {
+                            name: '難波站前‧勇者補給便當',
+                            type: '主食便當',
+                            price: '¥850',
+                            place: '南海難波站周邊便當店',
+                            rarity: '常見 · 一般補給',
+                            note: '體力上限 +20，暖身效果小幅提升',
+                            desc: '白飯搭配唐揚雞、玉子燒與醬菜的標準勇者補給組合。\n適合剛從關西海上要塞空港轉移到大阪、還在適應節奏時作為第一餐。'
+                        },
+                        {
+                            name: '道頓堀‧章魚燒能量球',
+                            type: '街邊小吃',
+                            price: '¥600～',
+                            place: '道頓堀商圈沿河攤販',
+                            rarity: '人氣 · 迷宮定番',
+                            note: '心情值 +30，拍照加成 +10',
+                            desc: '外酥內軟的章魚燒一口下去，搭配醬汁與柴魚片，瞬間回覆精神力。\n非常適合邊走邊吃，當作探索心齋橋與道頓堀時的機動補給品。'
+                        },
+                        {
+                            name: '日本橋‧深夜拉麵治癒碗',
+                            type: '熱食補給',
+                            price: '¥900～',
+                            place: '日本橋拉麵店 / 巷弄名店',
+                            rarity: '稀有 · 夜間限定',
+                            note: '疲勞 -25，溫暖度 +30',
+                            desc: '濃郁湯頭配上叉燒與半熟蛋的深夜拉麵，是清空一日迷宮疲勞的最佳儀式。\n建議在回京都前享用，可讓回程的魔導列車變成昏昏欲睡的療癒時段。'
+                        },
+                        {
+                            name: '梅田‧車站地下咖啡晨光套餐',
+                            type: '早餐組合',
+                            price: '¥650～',
+                            place: '梅田地下街咖啡館',
+                            rarity: '實用 · 早鳥補給',
+                            note: '專注 +15，行動速度 +10%',
+                            desc: '厚片吐司、沙拉與熱咖啡的簡單組合，卻是開始長程探索前最安定的起點。\n特別適合當作「前往姬路城」或「城市長距離移動」前的輕盈補給。'
+                        }
+                    ],
+                    kyoto: [
+                        {
+                            name: '四條‧靈脈共鳴水晶',
+                            type: '礦石素材',
+                            price: '¥1200～',
+                            place: '河原町周邊神秘雜貨店',
+                            rarity: '稀有 · 靈脈共鳴',
+                            note: '裝備插槽可鑲嵌一次，提升旅途安定度',
+                            desc: '微微發光的透明水晶，據說能同步佩戴者與京都靈脈的呼吸節奏。\n適合掛在隨身包或相機包上，象徵本次旅程的「守護核心」。'
+                        },
+                        {
+                            name: '新京極‧付喪神碎片石',
+                            type: '靈性素材',
+                            price: '¥800～',
+                            place: '新京極小巷內古道具店',
+                            rarity: '隱藏 · 緣分限定',
+                            note: '觀察力 +10，靈感觸發機率上升',
+                            desc: '外觀不起眼的小石頭，卻總讓人忍不住多看兩眼。\n據說是長年陪伴人類的器物，在覺醒成付喪神前殘留下來的碎片。'
+                        },
+                        {
+                            name: '京都塔‧夜光記錄晶核',
+                            type: '記憶媒介',
+                            price: '¥1500～',
+                            place: '京都塔周邊紀念品店',
+                            rarity: '高階 · 記憶封存',
+                            note: '回國後查看，會喚起本次旅程的片段畫面',
+                            desc: '外型像透明寶珠的水晶，內部會在黑暗中微微發光。\n非常適合當作「京都篇章完結」的象徵道具。'
+                        },
+                        {
+                            name: '貴船‧水紋青藍礦',
+                            type: '水屬性礦石',
+                            price: '¥1000～',
+                            place: '貴船神社周邊小店',
+                            rarity: '地域限定 · 水屬靈礦',
+                            note: '心情穩定度 +20，旅行焦躁感 -10',
+                            desc: '表面有如水波紋理的青藍色礦石，放在掌心會有微涼感。\n適合當作焦躁時握著的小物，幫助自己慢慢沉澱。'
+                        }
+                    ]
+                };
+
+                const currentSupplyList = computed(() => supplyData[supplySubTab.value] || []);
+
+                const itineraryData = ref({
+                  
+                    '2025-12-14': [
+                        { id: 1401, time: '05:45', title: '黎明前的集結：桃園空港前哨站', desc: '【任務起點：前哨站集結】天色尚未轉亮，桃園空港前哨站仍帶著夜色的餘溫。遠征隊成員揹著行囊陸續現身，在冷空氣與霧氣中回報到齊。這裡，是從日常世界跨入異境冒險的第一道轉移門檻。隊伍在此確認通行證、入境許可術式、行李裝備與夥伴狀態，完成後，精神值 +100，隊伍穩定度 +100。\n\n⚠️ 備註：建議提早抵達，預留托運儀式與安檢咒陣的時間，以免錯過飛空艇召喚時刻。', type: 'transport' },
+                        { id: 1402, time: '07:25', title: '登機門前的召喚陣待命', desc: '【前線待機任務：飛艇召喚陣】遠征隊在登機門前集合，在龍鱗飛艇的召喚陣等待。隊員們一邊檢查裝備欄位與座位分配，一邊調整背包與披風，準備踏上通往關西的空中航路。所有人確認無誤後進入「待命」狀態，行前緊張度 +30，專注度 -10。\n\n⚠️ 備註：隨時注意登機門魔法陣是否變更，請保持魔導通訊石訊息暢通，以免錯過登機法陣。', type: 'transport' },
+                        { id: 1403, time: '08:05', title: '穿越雲海的飛行篇章', desc: '【旅途章：雲上海面的魔導航路】龍鱗飛艇自桃園起飛，開啟魔導石引擎，穿越雲海與時間閃電的縫隙，朝關西海上要塞空港前進。此刻的機艙，是遠征開始前短暫安穩的結界。有人閉目養神，有人翻閱旅程卷軸規劃支線，有人單純望向雲海放空思緒。體力與精神在此緩緩回復，體力回復 +15，心情穩定度 +10。緊張度-15\n\n⚠️ 備註：可利用這段時間補眠或進行心靈冥想，為接下來的異國冒險儲備能量。', type: 'transport' },
+                        { id: 1404, time: '11:35', title: '踏上異國大地：關西海上要塞空港', desc: '【關卡切換：騎士團討伐魔王遠征隊出發】龍鱗飛艇降落關西海上要塞空港，遠征隊依序通過邊境審查結界（通關）、在托運轉盤前尋回各自的裝備箱。穿越海上機場長廊的那一刻，象徵正式踏入關西討伐魔王的主線章節。每一件成功取回的行李，都是接下來戰鬥與旅途的基礎裝備。\n\n⚠️ 備註：實際時間依現場狀況略有浮動，請留意海關規定與托運行李轉盤。檢查行李姓名拼音與標籤紋章是否正確，以免裝備誤入次元異界。', type: 'transport' },
+                        { id: 1405, time: '13:00', title: '委託行李特工：騎士團行動開始', desc: '【委託任務：行李特工的裝備轉移術】遠征隊尋找傳說中的「行李特工」，將笨重的大型裝備交付給專業運送隊伍，使用遠距離轉移術送往京都據點。透過這項委託，之後在大阪的探索將能以輕裝狀態行動，移動速度 +120%，疲勞累積速度 -50%。\n\n⚠️ 備註：確認寄送地址與京都據點隱者之灯的收件時間，並妥善保留收據與聯絡方式，一旦出現行李迷失事件，可立刻追蹤其去向。', type: 'transport' },
+                        { id: 1406, time: '13:30', title: '疾風魔導列車鐵人號：Rapi:t 轉移儀式', desc: '【轉移儀式：疾風魔導列車】自關西海上要塞空港搭乘藍色裝甲魔導列車 Rapi:t，這台被稱為「疾風魔鐵」的列車沿著鐵道刻畫出一條通往大阪的魔力軌跡。窗外海面與城市輪流映入眼簾，就像世界在替遠征隊展開序章插畫。這段路程，同時也是讓大家適應關西節奏的調頻時間。\n\n⚠️ 備註：可配合時刻表卷軸掌握列車動向，必要時調整後續集合與行程安排。', type: 'ticket', link: 'https://www.howto-osaka.com/tc/access-timetable/', linkText: '時刻卷軸' },
+                        { id: 1407, time: '14:00', title: '自由探索任務：大阪三層迷宮篇', desc: '【自由探索任務：大阪三層迷宮篇】\n午後起，遠征隊將踏入被稱為「大阪三層迷宮」的自由探索地帶。此區由三個族群勢力盤據，各自形成獨特的街區與能量場：\n\n◈ 第一層：難波 — 人類聚集地\n作為迷宮的外環城廓，難波是一切商貿與旅人往來的起點。街道上充滿活氣、叫賣聲與人類文明的秩序，是遠征隊補給、整備與重新編隊的絕佳層域。\n\n◈ 第二層：心齋橋筋 + 道頓堀 — 獸族領地\n穿過外環後便抵達獸族盤踞的繁華領域。巨大招牌、明亮燈火與如吼聲般的喧囂讓此地冒險氣息濃厚。\n其中最具威脅性的魔力源據悉位於：\n • 固力果招牌 —— 地下城大魔王的幻光之碑\n • 大丸心齋橋百貨 —— 獸族交易大殿\n • 心齋橋 PARCO —— 擁有多層幻境的冒險商城\n • 「惠比壽塔」道頓堀摩天輪 —— 盤踞著小 Boss 的迴轉天空塔\n\n◈ 第三層：日本橋商圈 — 魔族地盤\n此區魔力密度最高，是電器、模型與動漫能量交織的魔族黑市。\n若深入其核心，將見到多個強力據點：\n • 安利美特大阪日本橋 —— 魔書與畫像的知識塔\n • 駿河屋日本橋本館 —— 稀有古物與收藏寶庫\n • SUPER KIDS LAND —— 召喚機巧兵與模型魔像之地\n • JUNGLE 總店 —— 魔族交易所與隱藏任務頻繁出沒區\n\n在這三層迷宮中，每一條巷弄都可能觸發隱藏商店、期間限定 Buff、地域專屬戰利品或族群支線任務。非常適合依興趣分隊行動，隊伍探索效率 +30%。\n\n⚠️ 備註：請務必事先約定集合地點與回報時間，並保持{聯絡紋章}與魔導通訊石暢通，以免在魔族地盤中與隊伍失散。', type: 'sightseeing' },
+                        { id: 1408, time: '20:30', title: '轉進京都據點：與隊友再次合流', desc: '【據點轉移：從霓虹到古都】結束大阪迷宮前哨探索後，遠征隊啟程往京都移動，在預定的隱者之灯據點重整隊伍。列車與街景從霓虹閃爍的迷宮風格，逐漸轉為沉穩安靜的古都氛圍，彷彿世界色調被悄悄調暗一階。此處為新主基地啟用點，隊伍在此恢復體力並調整隔日戰術規劃。\n\n⚠️ 備註：抵達後請先確認房間分配、室友組合與隔日集合時間，避免早晨啟程時發生脫隊事件。', type: 'hotel' },
+                        { id: 1409, time: '22:00', title: '宵夜補給戰：超商、超市與唐吉軻德', desc: '【補給任務：夜間物資掃蕩】夜晚的京都仍有數處補給據點亮著燈光。遠征隊展開夜間補給戰：前往數字道具屋、羅森道具屋、生命超市與24HR唐吉軻德公會，掃貨零食、飲料與各種旅途小物。行囊重量 +15，但內心滿足度 +50，未來幾日的宵夜儀式與房內小聚因此有了堅實後盾。\n\n⚠️ 備註：請留意退稅門檻與當天購物時限，避免錯過魔法折扣與退稅結界法陣關閉時間。', type: 'food' },
+                        { id: 1410, time: '00:00', title: '第一夜終章：進入睡眠結界', desc: '【休息章：睡眠結界啟動】完成一整天的轉移與探索後，遠征隊各自回到房內，整理當日戰利品與裝備欄位，在柔軟被窩與暖氣構成的睡眠結界中進入恢復模式。HP條、MP條與社交能量緩緩回滿，為明日的長程包車戰與新一輪冒險做好準備。\n\n⚠️ 備註：確認晨喚符與隔日集合時間，並替魔導通訊石、留影水晶、魔力儲藏塊完成充電，避免明日失聯或時間判定失誤。', type: 'hotel' },
+    ],
+                    '2025-12-15': [
+                        { id: 1501, time: '08:00', title: '啟程．離開京都靈脈結界陣', desc: '【主線任務啟動：遠征馬車】清晨，遠征隊在隱者之灯大廳集合，登上專屬馬車。車輪滑過古都街道的石板路緩緩駛離城市，一路向關西平原與白鷺城前進。這是今日主線任務的開場：離開安全據點、踏上外地城池。\n\n⚠️ 備註：出發前請再次確認通行證、魔導通訊石、雨具與保暖衣物，避免在遠征途中因天候變化受到減益效果。', type: 'transport' },
+                        { id: 1502, time: '09:50', title: '姬路城探索．白鷺之城的記憶', desc: '【城郭探索任務：白鷺之城】遠征隊抵達姬路城，踏入猶如白鷺振翅般的城郭。白牆與瓦頂之間，藏著武士世代的記憶與無數歷史事件的觸發點。每一層樓梯、每一個箭孔，都像是過去戰役留下的技能欄位與防禦機制。隊伍在此獲得「歷史理解＋城郭感知」被動 Buff。\n\n⚠️ 備註：建議穿著好走的鞋子，城內階梯較多，長時間行走請注意膝蓋與腳踝耐久度。', type: 'sightseeing' },
+                        { id: 1503, time: '13:45', title: '勝尾寺．群山中的祈願與達摩', desc: '【靈域任務：達摩守護之山】午後，隊伍來到被群山環繞的勝尾寺。遍地達摩像如同無數小小守護靈，靜靜排列在石階與樹影之間，見證旅人許下願望、再慢慢實現。在此祈願可獲得「心靈防禦力 +100」、「好運 Buff（期間限定）」的加成，是遠征途中重要的精神補給據點。\n\n⚠️ 備註：可在此購買御守或小達摩當作本次遠征的幸運象徵，日後看到時也能喚起這段旅程記憶。', type: 'sightseeing' },
+                        { id: 1504, time: '16:45', title: '歸途馬車．返回隱者之灯', desc: '【回程章：記憶沉澱之路】夕陽緩緩落下，馬車載著略帶疲憊、卻滿載城郭與山寺回憶的遠征隊返回京都靈脈。窗外的山影與城市燈光交錯掠過，像一卷正在收尾的日間冒險畫卷。這段路程非常適合讓今日的畫面自然沉澱，讓腦海慢慢整理成可收錄進心靈冒險日誌的章節。', type: 'transport' },
+                        { id: 1505, time: '18:00', title: '夜間靈脈探索．各自展開小支線', desc: '【自由支線時間：各自的京都篇】夜幕降臨後，京都的靈脈開始甦醒，遠征隊進入「礦脈第一層」的夜間自由探索時段。這座由妖族建立、現代化後與人類共存的都市，在黑夜中展現真正的面貌——光亮、繁華，卻暗藏古老規矩與靈脈脈動。\n\n有人前往京都車站區域，挑戰那座看似普通的大階梯，卻不知自己正踏在妖族的數據散熱脈線上；也有人仰望京都塔，感受到主靈脈增幅器微弱的震動。\n往東走的隊員則踏入四條河原町的蜃氣樓商圈，讓狐妖們以時尚幻術與限定誘惑測試他們的意志力——在這裡，金錢即魔力，付出就能換取慾望。\n勇敢深入巷弄者，誤入新京極的回音迴廊，幸運的能遇見付喪神的惡作劇，倒楣的可能在時間錯位的幻境中多待幾分鐘——或幾個小時。\n也有隊員選擇回到據點休息，在安全結界中整理今日戰利品與心得，為隔日行程蓄力。\n\n⚠️ 請注意： 夜間靈脈雖美，但禁忌仍在。若氣息過度興奮、消費過量、或在鴨川邊與可疑旅人對視太久，都可能引來妖族的額外關注。記得準時返回據點，避免在妖都的夜色中迷失。', type: 'food' },
+                        { id: 1506, time: '00:00', title: '第二夜．記錄與充電', desc: '【休息章：回憶存檔與能量補滿】夜深後，遠征隊逐一關上房內燈光，將白鷺城與勝尾寺的畫面寫入心中的冒險日誌，或記錄在魔導通訊石的影像與備忘錄中。隨著睡眠結界開啟，身體與魔力條緩慢回滿，精神疲勞度下降，為接下來的山區與神社行程做好準備。', type: 'hotel' },
+                    ],
+                    '2025-12-16': [
+                        { id: 1601, time: '07:00', title: '飯店早餐．冒險前的補給之術', desc: '【補給之術：體力槽填滿】早晨在飯店享用早餐，從暖胃的湯品、麵包，到和風料理與蔬菜，都是遠征隊的基礎補給。這一餐直接決定今日的起始體力與專注力。吃飽喝足後，隊伍體力槽回滿，行動力 +120，抗寒與抗餓能力同步提升。\n\n⚠️ 備註：可多補充水分與蔬菜，以應付山區溫差與長時間行走。', type: 'food' },
+                        { id: 1602, time: '09:00', title: '貴船神社．沿水而上的祈願之路', desc: '【靈脈探訪：水之神社】馬車出發後，隊伍沿著山路前進，抵達貴船神社。石階兩側的紅色燈籠與山間流水交錯成一條「沿水而上的靈脈導線」，彷彿引導旅人一步步走向祈願的核心。在此祈求旅程順利、人際關係和諧，可獲得期間限定「人際好感度＋」與「旅途順利」Buff。\n\n⚠️ 備註：冬季山區氣溫偏低，請注意保暖與鞋底防滑，以免在石階上觸發意外摔倒 Debuff。', type: 'sightseeing' },
+                        { id: 1603, time: '11:30', title: '龍安寺．枯山水中的靜默思緒', desc: '【心靈副本：枯山水的謎題】龍安寺以枯山水庭園聞名，石與砂的排列猶如一幅沒有說明的謎題。遠征隊在此放慢腳步，靜靜坐下觀看，讓思緒與呼吸回到同一個平穩頻率。在這裡停留可獲得「心靈噪音 -20」、「專注力 +100」的被動效果。', type: 'sightseeing' },
+                        { id: 1604, time: '13:00', title: '晴明神社．陰陽師守護的街角', desc: '【術士領域：陰陽師的結界】隊伍前往晴明神社，這裡是傳說中陰陽師安倍晴明的根據地。神社內隨處可見五芒星符號與各式符咒，一步步踏入，像是闖入古老術士的工作室。在此參拜可獲得「平安守護」與「驅邪加護」的狀態加成，對於在外旅行的冒險者而言，是非常實用的防禦 Buff。', type: 'sightseeing' },
+                        { id: 1605, time: '13:45', title: '御金神社．金運加持的黃金結界', desc: '【財運任務：黃金鳥居的祝福】短暫步行後抵達御金神社，金色鳥居宛如金運結界入口，象徵財富與豐盛流動。遠征隊在此投下硬幣。為本次遠征以及未來投資與家宅祈求庇佑。於此祈願可觸發「金運小幅提升」與「家宅安穩」加成。\n\n⚠️ 備註：特別適合祈求財運、工作收入與家庭安定相關願望。', type: 'sightseeing' },
+                        { id: 1606, time: '14:30', title: '二條城．沉睡將軍的歷史舞台', desc: '【歷史副本：將軍居所】進入二條城，腳步踩在會發出鶯聲的木地板上，彷彿聽見古代武士與將軍在廊道上穿梭的回音。壁畫、庭園與建築結構共同編織出一幅權力、審美與時代交錯的畫卷。遠征隊在此獲得「歷史理解 +50」、「空間感知 +20」的被動加成。\n\n⚠️ 備註：室內請留意參觀動線與現場規定，避免觸發工作人員提醒事件。', type: 'sightseeing' },
+                        { id: 1607, time: '16:30', title: '高木批發超市三条店．零食風暴支線任務', desc: '【支線任務：補給倉庫突襲】傍晚來到高木批發超市三条店，這裡被傳為「零食與泡麵的寶庫」。走進店內，貨架宛如一排排等待被探索的寶箱，價格親切，是補充宵夜與伴手禮的黃金據點。成功掃貨後，隊伍「宵夜庫存量 +10000」、「旅途口糧安全感 +5000」。\n\n⚠️ 備註：記得開啟下方傳送門導航，避免在巷弄迷宮中迷路。', type: 'shop', link: 'https://maps.app.goo.gl/QiqSBbP7DtEsyLQV8?g_st=ic', linkText: '開啟導航' },
+                        { id: 1608, time: '18:30', title: '歸返隱者之灯．滿載物資', desc: '【物資回收：據點再補滿】結束高木倉庫的掃貨任務後，馬車載著裝滿零食與補給品返回隱者之灯。雖然行李重量再度上升，但心情值與未來幾晚的滿足感也隨之提升。', type: 'transport' },
+                        { id: 1609, time: '19:00', title: '自由夜行．在京都的街巷中徘徊', desc: '【夜間自由支線：各自探索】夜色覆上京都後，妖族與人類共存的現代都市真正甦醒。遠征隊進入「夜間自由支線時段」，城市的靈脈在此刻最為鮮明。\n\n有人步入京都高島屋——財祿狐商會總部，感受狐族巧妙地操控的「財祿流」，有旅人在此被選中、獲得提升購運的金運符；有人誤闖大丸・衣紋妖的織氣塔，在纖維靈的注視下挑選服飾，衣物彷彿自己找到主人。\n更勇敢的探索者踏入唐吉軻德公會內的混沌市集，通道如迷宮般變換，引導旅人邂逅「剛好需要」的道具；也有人朝 Kiddy Land 夢境玩偶棲所前進，被夢靈選中的玩偶往往能帶來強化心情的 buff。\n若想平靜，隊員們會走向 BAL 靈感基地，在書靈的思念流中獲得靈感碎片；或漫步至 京都 LOFT，付喪神的多層棲地，與主動呼喚旅人的小物邂逅，開啟羈絆事件。\n\n也有冒險者選擇回到據點，在安全結界中拆零食、整理戰利品，讓今日的故事沉入心底。\n在妖都京都的夜裡，每個選擇，都會悄悄寫入今晚的個人傳說。', type: 'food' },
+                        { id: 1610, time: '00:00', title: '第三夜．靈脈巡禮的冒險旅程暫時告一段落', desc: '【休息章：靈脈巡禮後的沈澱】經過一整天的神社與靈脈巡禮，身心都需要好好沈澱。遠征隊在各自房間的睡眠結界中安靜躺下，讓今天吸收的風景、故事與祈願慢慢沉入心底。體力條、魔力條再度回滿，為接下來的任天堂回憶神殿與宇治之行預做準備。', type: 'hotel' },
+                    ],
+                    '2025-12-17': [
+                        { id: 1701, time: '全天', title: '與分隊會合．遠征隊正式完整編成', desc: '【羈絆任務：全員集結】今天是會合之日。分散在不同路線與時間抵達京都的成員陸續現身隱者之灯，重組為完整的遠征隊。大家彼此交換前幾日的戰利品、照片與奇聞趣事，隊伍羈絆值大幅提升，默契度 +3000，整體士氣 +2000。', type: 'hotel' },
+                        { id: 1702, time: 'All Day', title: '自由漫步．各自完成想去的支線任務', desc: '【自由日任務：支線全面開放】這一天沒有硬性主線行程，每位成員都可以自由選擇想走的路線：有人前往寺社再訪、強化心靈 Buff；有人選擇百貨血拼、蒐集隨機寶箱與護具裝備；也有人只想找家咖啡店坐一下午，讓心靈與雙腳一起休息。所有選擇，都是旅程的一部分，請找尋屬於自己的冒險支線吧!!!\n\n⚠️ 備註：可與小隊討論行程，約好集合時間與安全聯絡方式，確保每位成員都能安全回到據點。', type: 'sightseeing' }
+                    ],
+                    '2025-12-18': [
+                        { id: 1801, time: '09:00', title: '大廳集合．前往任天堂回憶神殿', desc: '【主線任務：冒險家聖地出發】早晨在飯店大廳集合後，遠征隊整隊出發，朝任天堂博物館前進。對許多成員而言，那裡是無數遊戲記憶與童年像素誕生的源頭，堪稱冒險家心中的回憶神殿。', type: 'transport' },
+                        { id: 1802, time: '10:30', title: '任天堂博物館入場儀式', desc: '【入場儀式：回憶大門開啟】抵達任天堂博物館後，在入口完成票券檢查與入場手續。當大門緩緩打開，門後的每一個展區，都是不同比例尺的時間結晶，從 8-bit 到現代畫面，彷彿一條可行走的時間走廊。', type: 'ticket' },
+                        { id: 1803, time: '11:00', title: '像素與記憶．任天堂世界探索', desc: '【探索副本：像素世界巡禮】遠征隊在展場中穿梭，與經典角色合影、回顧歷代主機與遊戲作品。從紅白機到現代主機，不同世代的記憶交織在同一個空間。這裡不只是展示空間，而是一場回到冒險家初心的朝聖旅程。笑聲與驚呼聲交織成一首 8-bit 與現代交響混音的 BGM。\n\n⚠️ 備註：請留意館內攝影規定與參觀動線，避免與其他隊伍互相阻擋。', type: 'sightseeing' },
+                        { id: 1804, time: '14:45', title: '前往宇治．穿越到茶香與古橋之地', desc: '【轉場章：前往河畔小鎮】離開任天堂回憶神殿後，隊伍啟程前往宇治。魔導列車行駛間，窗外景色從都會街景逐漸轉為河川、小橋與低矮房舍，空氣中彷彿也染上了淡淡的茶香幻影。這是一段從像素世界回到自然河畔的調適旅程。', type: 'transport' },
+                        { id: 1805, time: '15:15', title: '宇治川畔．平等院與鳳凰堂', desc: '【風景副本：鳳凰映水】抵達 JR 宇治站後，步行約 10 分鐘來到平等院。鳳凰堂倒映在池水中的景象，宛如從古畫中走出的建築幻影，時間在此似乎被放慢幾拍。這裡非常適合靜靜感受日本美學的細膩，將今日的感受刻在心底。\n\n⚠️ 備註：若時間允許，可沿著宇治川散步或品嚐抹茶甜點，為今日增加「甜點療癒度 +200」。', type: 'sightseeing' },
+                        { id: 1806, time: '17:00', title: '返回京都．黃昏中的回程列車', desc: '【回程章：風景收束時刻】夕陽染上車窗與河面，遠征隊搭乘魔導列車返回京都據點。這段列車旅程，是讓今日的畫面慢慢從視覺轉為記憶的黃金時段，所有風景都在心中悄悄歸檔。', type: 'transport' },
+                        { id: 1807, time: '19:20', title: '裏五十棲聚餐．夜色中的饗宴', desc: '【羈絆宴會：隊伍交流時間】在大廳集合後，參加聚餐成員一同前往裏五十棲用餐。桌上料理熱氣與酒杯碰撞聲交織，搭配笑聲與分享旅程故事，構成遠征期間極為重要的「羈絆交流時間」。隊伍感情度 +1300，回憶共同度 +2500。\n\n⚠️ 備註：未參加聚餐者則保留自由活動時間，可自行安排晚餐與行程，但仍建議留意安全與返回時間。', type: 'food' }
+                    ],
+                    '2025-12-19': [
+                        { id: 1901, time: '08:00', title: '冒險者的自由時光：終章前的探索', desc: '【終章前自由探索：最後衝刺日】在正式邁入旅程終章前，這是冒險者最後一次任意探索未完成支線與遺珠地點的黃金時段。這一天完全交給「騎士團討伐魔王遠征隊」自由支配。可以補足尚未完成的清單：補貨、再訪喜歡的街區、到河岸邊發呆或單純拍照留念，讓旅程節奏再慢下來一次，為結局預留一點餘韻。\n\n⚠️ 備註：建議預留體力與時間，避免晚間集合與夜間行程出現趕場與疲勞過度的情況。', type: 'sightseeing' },
+                        { id: 1902, time: '17:45', title: '鳥貴族集結．木屋町通店前的待機點', desc: '【晚宴前集結：河畔集合點】傍晚於指定地點集合，準備前往鳥貴族木屋町通店。沿著鴨川與木屋町一帶前進，街燈與店家招牌一一點亮，京都夜晚的另一種樣貌也隨之登場。\n\n這裡是今晚慶功宴開場前的重要待機點。\n\n⚠️ 備註：下方傳送門為官方地圖頁，建議提前確認路線，避免在小巷迷宮中迷路。', type: 'transport', link: 'https://map.torikizoku.co.jp/detail/377/', linkText: '地圖傳送門' },
+                        { id: 1903, time: '18:00', title: '鳥貴族吃到飽．歡笑與乾杯的夜宴', desc: '【慶功副本：吃到飽盛宴】在鳥貴族木屋町通店展開吃到飽模式，桌上串燒與飲品源源不絕地上桌。遠征隊在此放鬆防備，敞開胃袋與笑容，為這趟旅程舉杯慶祝。這一晚，是旅程中笑聲最密集的片段之一，羈絆度 +40，飽食度 +100。\n\n⚠️ 備註：請注意酒量與身體狀況，保持安全與理性，避免觸發「隔天宿醉」Debuff。', type: 'food' },
+                        { id: 1904, time: '20:00', title: '羅森道具屋&唐吉軻德公會 最後衝刺', desc: '【終盤採購任務：戰利品補完計畫】晚餐後前往道具屋與公會地下市集進行最後採買，補完伴手禮清單與那些先前猶豫沒買的心願品項。這是整理願望清單、補完所有遺珠戰利品的最後機會。完成後，可獲得「購物滿足度 +100000」與「行李塞滿指數 +2000」。', type: 'shop' },
+                        { id: 1905, time: '00:00', title: '整理行囊．為歸國做準備', desc: '【歸途前的整備】回到隱者之灯後，遠征隊開始返航前的整備。行李箱打開，來自大阪迷宮的戰利品─心齋橋獸族領地的幻術系裝備、日本橋魔族地盤的稀有道具─與京都妖都靈脈的各式紀念物，依序被重新分類、收納與封印。\n\n在心齋橋面對大Boss招牌的霓虹壓迫、在日本橋魔力濃度爆表的街道獵寶、在四條河原町被狐族的財祿流Buff影響金錢運勢、在新京極回音迴廊差點迷失時間─以及在妖族與人類共存的京都夜色下所聽見的脈動，都逐一沉入行李的夾層中。\n\n這道整備並非單純的物品整理，而是將兩座城市的冒險篇章封存的儀式。當拉鍊扣上，象徵 「大阪迷宮篇」與「京都妖都篇」 正式告一段落，遠征隊已準備迎接明日的返航節點。\n\n⚠️ 備註： 請再次確認行李重量與液體規則，避免在空港觸發「超重費用」或「安檢退貨」事件。', type: 'hotel' }
+                    ],
+                    '2025-12-20': [
+                        { id: 2001, time: '09:30', title: '列隊歡送．分隊歸國', desc: '【前線隊伍輪替：分隊先行返陣】\n清晨，遠征隊在隱者之灯房門前集合，為先行返回桃園前哨站的分隊進行簡短的出發告別。這不是儀式，而是冒險者之間的禮節——揮手、碰拳、擁抱與合照，象徵遠征隊即將進入尾聲段落，也替下一次共同出征埋下「再度集結」的契約。\n\n⚠️ 建議： 此時是拍攝全隊大合照的最佳時刻，可記錄本次遠征的完整隊形。', type: 'hotel' },
+                        { id: 2002, time: '09:45', title: '退房手續．離開京都', desc: '【據點閉鎖：隱者之灯的任務完成】\n隊伍回到大廳，辦理退房手續。當鑰匙交回櫃檯的瞬間，象徵這座臨時建立的冒險據點「隱者之灯」已完成它在旅程中的使命。儘管據點在地圖上被標記為「已關閉」，但它已在隊伍心中登錄成永久的記憶坐標。', type: 'hotel' },
+                        { id: 2003, time: '10:00', title: '前往 OUTLET．最後的購物戰場', desc: '【終盤戰場：資源與欲望的最終抉擇】\n遠征隊離開隱者之灯，搭乘交通隊伍前往 OUTLET 終盤區域。車上討論聲不斷——未完成的清單、必買的稀有裝備、最後能使用的加隆。此刻的隊伍像是準備踏入冒險最後的資源戰區，每個人都握著自己剩餘的「財富值」。', type: 'transport' },
+                        { id: 2004, time: '11:30', title: 'OUTLET 大決戰．終盤戰利品收集', desc: '【最終尋寶層：戰利品收集挑戰】\nOUTLET 被視為旅程的「BOSS寶箱尋寶層」。此地擁有高密度的商店魔力場，冒險者可在此進行最後的裝備補強：武器與防具、魔杖、特殊道具卷軸、魔導核心、次元袋、心靈與 Buff 系道具。\n\n每位隊員需在「預算值」「行囊負重」「理智條」三項屬性間進行平衡判定，才能成功獲得最適合自己的戰利品。此地取得的每一件物品，都將作為遠征結束後的「記憶具現道具」。\n\n⚠️ 提示： 請預留移動與寄物時間，避免觸發「時間不足」的強制移動事件。', type: 'shop' },
+                        { id: 2005, time: '15:40', title: '寄物櫃前集合．整理戰利品', desc: '【整隊點：戰利品盤點區】\n遠征隊在寄物櫃前會合，清點從終盤層帶回的戰利品，並重新分配至托運或手提行囊。這是撤離前最後的盤點，也是確認「無遺失、無掉落」的最終機會。', type: 'hotel' },
+                        { id: 2006, time: '16:05', title: '搭乘臨空城接駁車．前往機場', desc: '【轉移章：通往終點關卡】\n隊伍搭上接駁車，沿著海岸線駛向 關西海上要塞空港。窗外景色宛如一段緩慢播放的旅程 Ending，彷彿在提醒隊員們：冒險即將進入存檔畫面。', type: 'transport' },
+                        { id: 2007, time: '16:25', title: '機場待機．整理記憶與通關手續', desc: '【終章前準備：通關、休整與回憶】\n抵達 關西海上要塞空港後，隊伍進行報到、托運與出境結界流程。剩餘時間可購買最後的結界小物、整頓心情，或靜靜瀏覽旅途中拍下的記憶影像。這段等待，是遠征故事的柔和逗點，而非句點。', type: 'transport' },
+                        { id: 2008, time: '18:20', title: '歸鄉之翼．從關西返航桃園', desc: '【最終章：回到原點的存檔】\n18:20 開始登上歸鄉之翼，19:00 自關西海上要塞空港起航。鐵翼穿越夜空，朝桃園前哨站前進。約 21:15 著陸——當機輪觸地的瞬間，本次「騎士團討伐魔王遠征」正式存檔完成。\n\n旅程在地圖上結束，但冒險者心中的劇本，正準備迎接下一章。', type: 'transport' }
+                    ]
+                });
+
+                const currentEvents = computed(() => itineraryData.value[selectedDate.value] || []);
+                const selectDay = (date) => { selectedDate.value = date; nextTick(() => initSortable()); };
+                const getChapterTitle = (date) => days.find(d => d.date === date)?.chapter || '';
+                const getChapterSubtitle = (date) => days.find(d => d.date === date)?.subtitle || '';
+                const getCategoryColor = (type) => ({ sightseeing: 'border-l-purple-400', transport: 'border-l-blue-400', food: 'border-l-orange-400', shop: 'border-l-yellow-400', hotel: 'border-l-indigo-400', ticket: 'border-l-red-400' }[type] || 'border-l-white');
+                const getCategoryIcon = (type) => eventTypes.find(t => t.val === type)?.icon || 'fa-solid fa-circle';
+
+                let sortableInstance = null;
+                const initSortable = () => {
+                    const el = document.getElementById('itinerary-list');
+                    if (!el) return;
+                    if (sortableInstance) sortableInstance.destroy();
+                    sortableInstance = new Sortable(el, {
+                        animation: 200, delay: 200, delayOnTouchOnly: true, ghostClass: 'sortable-ghost', dragClass: 'sortable-drag',
+                        onEnd: function (evt) {
+                            const item = itineraryData.value[selectedDate.value].splice(evt.oldIndex, 1)[0];
+                            itineraryData.value[selectedDate.value].splice(evt.newIndex, 0, item);
+                        },
+                    });
+                };
+
+                const openAddModal = () => { modalMode.value = 'add'; editingEvent.value = { id: Date.now(), time: '', title: '', desc: '', type: 'sightseeing', link: '' }; confirmDelete.value = false; isModalOpen.value = true; };
+                const editEvent = (event) => { modalMode.value = 'edit'; editingEvent.value = { ...event }; confirmDelete.value = false; isModalOpen.value = true; };
+                const closeModal = () => isModalOpen.value = false;
+                const saveEvent = () => {
+                    if (!editingEvent.value.title) return alert('請輸入標題');
+                    if (modalMode.value === 'add') {
+                        if (!itineraryData.value[selectedDate.value]) itineraryData.value[selectedDate.value] = [];
+                        itineraryData.value[selectedDate.value].push({ ...editingEvent.value });
+                    } else {
+                        const list = itineraryData.value[selectedDate.value];
+                        const index = list.findIndex(e => e.id === editingEvent.value.id);
+                        if (index !== -1) list[index] = { ...editingEvent.value };
+                    }
+                    closeModal();
+                };
+                const handleDelete = () => {
+                    if (!confirmDelete.value) { confirmDelete.value = true; return; }
+                    const list = itineraryData.value[selectedDate.value];
+                    const index = list.findIndex(e => e.id === editingEvent.value.id);
+                    if (index !== -1) list.splice(index, 1);
+                    closeModal();
+                };
+                const toggleAI = () => showChatModal.value = !showChatModal.value;
+
+                onMounted(() => { setTimeout(() => isLoading.value = false, 1500); nextTick(() => initSortable()); });
+                watch(currentTab, (newVal) => { if (newVal === 'journal') nextTick(() => initSortable()); });
+
+                return { 
+                    isLoading, currentTab, 
+                    guildSubTab, guildData, guildTabs, selectedLayer, currentLayerData, selectedKyotoLayer, currentKyotoData,
+                    headerTitle, headerSubtitle, headerIcon,
+                    tabs: [
+                        { id: 'journal', label: '日誌', icon: 'fa-solid fa-scroll' },
+                        { id: 'guild', label: '公會', icon: 'fa-solid fa-book-journal-whills' },
+                        { id: 'supply', label: '補給', icon: 'fa-solid fa-box-archive' },
+                        { id: 'coins', label: '加隆', icon: 'fa-solid fa-coins' },
+                        { id: 'bag', label: '行囊', icon: 'fa-solid fa-suitcase-rolling' }
+                    ], 
+                    days, selectedDate, selectDay, getChapterTitle, getChapterSubtitle, currentEvents, getCategoryColor, getCategoryIcon,
+                    isModalOpen, openAddModal, editEvent, closeModal, saveEvent, editingEvent, eventTypes, modalMode, handleDelete, confirmDelete,
+                    showChatModal, toggleAI,
+                    weatherForecast: [ 
+                        { date: '12/14', icon: 'fa-solid fa-sun text-yellow-300', low: '5°', high: '12°' }, 
+                        { date: '12/15', icon: 'fa-solid fa-cloud text-gray-300', low: '4°', high: '10°' }, 
+                        { date: '12/16', icon: 'fa-solid fa-snowflake text-white', low: '1°', high: '6°' }, 
+                        { date: '12/17', icon: 'fa-solid fa-sun text-yellow-300', low: '2°', high: '8°' }, 
+                        { date: '12/18', icon: 'fa-solid fa-cloud-rain text-blue-300', low: '3°', high: '9°' }, 
+                        { date: '12/19', icon: 'fa-solid fa-cloud text-gray-300', low: '4°', high: '11°' }, 
+                        { date: '12/20', icon: 'fa-solid fa-sun text-yellow-300', low: '5°', high: '13°' } 
+                    ],
+                    // 補給相關
+                    supplySubTab,
+                    supplyTabs,
+                    currentSupplyList
+                };
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>
