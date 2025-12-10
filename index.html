@@ -11,9 +11,8 @@
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
-
     <script>
         tailwind.config = {
             theme: {
@@ -24,27 +23,33 @@
                     },
                     colors: {
                         magic: {
-                            dark: '#0f172a', mist: 'rgba(255, 255, 255, 0.08)', ice: '#a5f3fc',
-                            silver: '#e2e8f0', glow: 'rgba(165, 243, 252, 0.4)', active: '#ffffff',
+                            dark: '#0f172a', 
+                            night: '#2E3338',
+                            mist: 'rgba(255, 255, 255, 0.08)', 
+                            ice: '#a5f3fc',
+                            blue: '#A7D7FF',
+                            silver: '#e2e8f0', 
+                            glow: 'rgba(165, 243, 252, 0.4)', 
+                            active: '#ffffff',
                             danger: '#ef4444',
+                        },
+                        animation: {
+                            'spin-slow': 'spin 8s linear infinite',
+                            'float': 'float 6s ease-in-out infinite',
+                            'slide-up': 'slide-up 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
+                            'fade-in': 'fade-in 0.5s ease-out forwards',
+                            'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        },
+                        keyframes: {
+                            float: { '0%, 100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(-10px)' } },
+                            'slide-up': { '0%': { transform: 'translateY(100%)' }, '100%': { transform: 'translateY(0)' } },
+                            'fade-in': { '0%': { opacity: '0', transform: 'translateY(10px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } }
                         }
-                    },
-                    animation: {
-                        'spin-slow': 'spin 8s linear infinite',
-                        'float': 'float 6s ease-in-out infinite',
-                        'slide-up': 'slide-up 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
-                        'fade-in': 'fade-in 0.5s ease-out forwards',
-                    },
-                    keyframes: {
-                        float: { '0%, 100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(-10px)' } },
-                        'slide-up': { '0%': { transform: 'translateY(100%)' }, '100%': { transform: 'translateY(0)' } },
-                        'fade-in': { '0%': { opacity: '0', transform: 'translateY(10px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } }
                     }
                 }
             }
         }
     </script>
-
     <style>
         html, body {
             height: 100%; width: 100%; overflow: hidden;
@@ -75,16 +80,34 @@
         .magic-input:focus { border-color: #a5f3fc; background: rgba(0, 0, 0, 0.5); box-shadow: 0 0 10px rgba(165, 243, 252, 0.2); }
         .scroller { overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior-y: contain; -ms-overflow-style: none; scrollbar-width: none; }
         .scroller::-webkit-scrollbar { display: none; }
+        
+        /* Checkbox Custom Style */
+        .magic-checkbox { appearance: none; width: 20px; height: 20px; border: 2px solid #a5f3fc; border-radius: 6px; position: relative; cursor: pointer; transition: all 0.2s; }
+        .magic-checkbox:checked { background: #a5f3fc; }
+        .magic-checkbox:checked::after { content: '\f00c'; font-family: "Font Awesome 6 Free"; font-weight: 900; position: absolute; color: #0f172a; font-size: 12px; top: 50%; left: 50%; transform: translate(-50%, -50%); }
+
+        /* Coins Page Specifics */
+        .ice-card {
+            background: rgba(242, 247, 250, 0.08); backdrop-filter: blur(20px);
+            border: 1px solid rgba(167, 215, 255, 0.2);
+            box-shadow: 0 0 15px rgba(167, 215, 255, 0.05);
+        }
+        .pie-chart {
+            border-radius: 50%;
+            position: relative;
+            box-shadow: 0 0 20px rgba(167, 215, 255, 0.15);
+        }
+        .pie-chart::after {
+            content: ""; position: absolute; inset: 25%; background: rgba(46, 51, 56, 0.9); border-radius: 50%;
+        }
     </style>
 </head>
 <body class="font-serif antialiased relative select-none text-base">
-
     <div id="app" class="h-full w-full flex flex-col relative z-10">
         
         <div v-for="n in 10" :key="n" class="absolute rounded-full pointer-events-none animate-float opacity-30 bg-magic-ice blur-[2px]"
              :style="{ left: Math.random() * 100 + '%', top: Math.random() * 100 + '%', width: Math.random() * 4 + 'px', height: Math.random() * 4 + 'px', animationDuration: Math.random() * 10 + 15 + 's' }">
         </div>
-
         <transition name="fade" mode="out-in">
             <div v-if="isLoading" class="absolute inset-0 z-[100] flex flex-col items-center justify-center bg-magic-dark text-magic-ice">
                 <div class="relative w-24 h-24 mb-6">
@@ -94,7 +117,6 @@
                 <p class="text-lg tracking-widest text-glow animate-pulse">騎士團集結中...</p>
             </div>
         </transition>
-
         <div v-else class="flex flex-col h-full w-full overflow-hidden">
             
             <header class="glass-panel px-3 py-1 flex justify-between items-center z-20 shrink-0 border-b-0 rounded-b-3xl mx-2 mt-0">
@@ -115,10 +137,8 @@
                     </div>
                 </div>
             </header>
-
             <main class="flex-1 flex flex-col min-h-0 mt-0 relative">
                 
-                <!-- 日誌 -->
                 <div v-if="currentTab === 'journal'" class="flex flex-col h-full min-h-0">
                     <section class="mt-1 px-4 shrink-0">
                         <div class="flex items-center gap-2 mb-1 pl-4">
@@ -137,42 +157,42 @@
                             </div>
                         </div>
                     </section>
-
                     <div class="shrink-0 py-1.5 px-4 overflow-x-auto no-scrollbar flex gap-2 snap-x">
                         <div v-for="(day, index) in days" :key="index" @click="selectDay(day.date)"
-                             class="snap-start shrink-0 w-14 h-13 rounded-xl border flex flex-col items-center justify-center transition-all duration-300 relative overflow-hidden group cursor-pointer"
-                             :class="selectedDate === day.date ? 'bg-magic-ice/20 border-magic-ice shadow-[0_0_15px_rgba(165,243,252,0.2)]' : 'bg-black/30 border-white/10'">
+                            class="snap-start shrink-0 w-14 h-14 rounded-xl border flex flex-col items-center justify-center transition-all duration-300 relative overflow-hidden group cursor-pointer"
+                            :class="selectedDate === day.date ? 'bg-magic-ice/20 border-magic-ice shadow-[0_0_15px_rgba(165,243,252,0.2)]' : 'bg-black/30 border-white/10'">
                             <span class="text-xs font-bold z-10 font-sans leading-none" :class="selectedDate === day.date ? 'text-white' : 'text-gray-300'">{{ day.week }}</span>
                             <span class="text-base font-bold z-10 leading-none mt-0.5" :class="selectedDate === day.date ? 'text-cyan-300' : 'text-white'">{{ day.day }}</span>
                         </div>
                     </div>
-
                     <div class="px-5 py-0 text-left shrink-0 mb-1">
                         <h2 class="text-white drop-shadow-md flex items-center justify-start gap-2 flex-wrap">
                             <span class="font-cursive text-2xl text-magic-ice leading-none mt-0">{{ getChapterTitle(selectedDate) }}</span>
                             <span class="font-serif text-sm font-bold tracking-wide mt-1">{{ getChapterSubtitle(selectedDate) }}</span>
                         </h2>
                     </div>
-
-                    <div class="flex-1 scroller px-4 pb-24" id="itinerary-list">
+                    <div class="flex-1 scroller px-4 pb-24">
                         <div v-if="currentEvents.length === 0" class="flex flex-col items-center justify-center py-16 text-gray-400">
-                            <i class="fa-solid fa-scroll text-3xl mb-3 opacity-50"></i><p class="text-sm">尚未記載冒險...</p>
+                            <i class="fa-solid fa-scroll text-3xl mb-3 opacity-50"></i>
+                            <p class="text-sm">尚未記載冒險...</p>
                         </div>
-                        <div v-for="event in currentEvents" :key="event.id" :data-id="event.id" @click="editEvent(event)"
-                             class="relative pl-5 mb-4 group cursor-pointer active:scale-[0.99] transition-transform touch-manipulation">
-                            <div class="absolute left-0 top-3 bottom-0 w-[2px] bg-gradient-to-b from-magic-ice/30 to-transparent"></div>
-                            <div class="absolute -left-[5px] top-3 w-3 h-3 rounded-full bg-magic-dark border-2 border-magic-ice shadow-[0_0_8px_rgba(165,243,252,0.5)]"></div>
-                            <div class="glass-panel rounded-2xl p-3 border-l-[3px]" :class="getCategoryColor(event.type)">
-                                <div class="flex justify-between items-start mb-1">
-                                    <span class="text-[15px] font-mono text-magic-ice bg-black/40 px-1.5 py-0.5 rounded-md">{{ event.time }}</span>
-                                    <i :class="getCategoryIcon(event.type)" class="text-gray-400 text-xs opacity-50"></i>
-                                </div>
-                                <h3 class="text-[1.25rem] font-bold text-white mb-1 leading-snug">{{ event.title }}</h3>
-                                <p class="text-[0.825rem] text-gray-300 leading-relaxed font-light whitespace-pre-line">{{ event.desc }}</p>
-                                <div v-if="event.link" class="mt-2">
-                                    <a :href="event.link" target="_blank" @click.stop class="inline-flex items-center gap-2 text-[10px] bg-magic-ice/10 text-magic-ice px-3 py-1.5 rounded-xl border border-magic-ice/20 active:bg-magic-ice/30 transition-colors">
-                                        <i class="fa-solid fa-link"></i> {{ event.linkText || '傳送門' }}
-                                    </a>
+                        <div v-else id="itinerary-list">
+                            <div v-for="event in currentEvents" :key="event.id" :data-id="event.id" @click="editEvent(event)"
+                                class="relative pl-5 mb-4 group cursor-pointer active:scale-[0.99] transition-transform touch-manipulation">
+                                <div class="absolute left-0 top-3 bottom-0 w-[2px] bg-gradient-to-b from-magic-ice/30 to-transparent"></div>
+                                <div class="absolute -left-[5px] top-3 w-3 h-3 rounded-full bg-magic-dark border-2 border-magic-ice shadow-[0_0_8px_rgba(165,243,252,0.5)]"></div>
+                                <div class="glass-panel rounded-2xl p-3 border-l-[3px]" :class="getCategoryColor(event.type)">
+                                    <div class="flex justify-between items-start mb-1">
+                                        <span class="text-[15px] font-mono text-magic-ice bg-black/40 px-1.5 py-0.5 rounded-md">{{ event.time }}</span>
+                                        <i :class="getCategoryIcon(event.type)" class="text-gray-400 text-xs opacity-50"></i>
+                                    </div>
+                                    <h3 class="text-[1.25rem] font-bold text-white mb-1 leading-snug">{{ event.title }}</h3>
+                                    <p class="text-[0.825rem] text-gray-300 leading-relaxed font-light whitespace-pre-line">{{ event.desc }}</p>
+                                    <div v-if="event.link" class="mt-2">
+                                        <a :href="event.link" target="_blank" @click.stop class="inline-flex items-center gap-2 text-[10px] bg-magic-ice/10 text-magic-ice px-3 py-1.5 rounded-xl border border-magic-ice/20 active:bg-magic-ice/30 transition-colors">
+                                            <i class="fa-solid fa-link"></i> {{ event.linkText || '傳送門' }}
+                                        </a>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -181,8 +201,7 @@
                         <i class="fa-solid fa-plus"></i>
                     </button>
                 </div>
-
-                <!-- 公會 -->
+                
                 <div v-else-if="currentTab === 'guild'" class="flex flex-col h-full min-h-0 font-serif">
                     <div class="px-4 py-2 shrink-0 flex gap-2">
                         <button v-for="sub in guildTabs" :key="sub.id" @click="guildSubTab = sub.id"
@@ -192,7 +211,6 @@
                             <span class="text-xs font-bold tracking-widest">{{ sub.label }}</span>
                         </button>
                     </div>
-
                     <div v-if="guildSubTab === 'castle'" class="flex-1 scroller px-4 pb-24 animate-fade-in">
                         <div class="mb-4 text-center mt-2">
                             <h3 class="text-xl text-magic-ice font-cursive">The Demon King's Castles</h3>
@@ -202,33 +220,20 @@
                             <div class="absolute top-0 right-0 p-2 opacity-10 group-hover:opacity-20 transition-opacity">
                                 <i class="fa-brands fa-fort-awesome text-6xl text-white"></i>
                             </div>
-                            <h4 class="text-lg font-bold text-white mb-1 flex items-center gap-2">
-                                <i class="fa-solid fa-chess-rook text-magic-ice"></i> {{ castle.name }}
-                            </h4>
+                            <h4 class="text-lg font-bold text-white mb-1 flex items-center gap-2"><i class="fa-solid fa-chess-rook text-magic-ice"></i> {{ castle.name }}</h4>
                             <div class="text-xs text-gray-300 leading-relaxed mb-3 font-light text-justify">{{ castle.desc }}</div>
                             <div class="bg-black/30 rounded-lg p-2 mb-3">
-                                <div class="flex items-start gap-2 mb-1">
-                                    <i class="fa-solid fa-circle-exclamation text-yellow-400 text-[10px] mt-0.5"></i>
-                                    <p class="text-[10px] text-gray-400">{{ castle.tips }}</p>
-                                </div>
-                                <div class="flex items-start gap-2">
-                                    <i class="fa-solid fa-camera text-pink-400 text-[10px] mt-0.5"></i>
-                                    <p class="text-[10px] text-gray-400">{{ castle.photo }}</p>
-                                </div>
+                                <div class="flex items-start gap-2 mb-1"><i class="fa-solid fa-circle-exclamation text-yellow-400 text-[10px] mt-0.5"></i><p class="text-[11px] text-gray-400">{{ castle.tips }}</p></div>
+                                <div class="flex items-start gap-2"><i class="fa-solid fa-camera text-pink-400 text-[10px] mt-0.5"></i><p class="text-[11px] text-gray-400">{{ castle.photo }}</p></div>
                             </div>
-                            <a :href="castle.map" target="_blank" class="block w-full py-2 bg-white/10 hover:bg-magic-ice/20 border border-white/20 rounded-xl text-center text-xs text-white transition-colors">
-                                <i class="fa-solid fa-location-arrow mr-1"></i> 開啟傳送門
-                            </a>
+                            <a :href="castle.map" target="_blank" class="block w-full py-2 bg-white/10 hover:bg-magic-ice/20 border border-white/20 rounded-xl text-center text-xs text-white transition-colors"><i class="fa-solid fa-location-arrow mr-1"></i> 開啟傳送門</a>
                         </div>
                     </div>
-
                     <div v-else-if="guildSubTab === 'labyrinth'" class="flex-1 flex flex-col min-h-0 animate-fade-in">
                         <div class="px-4 pb-2 overflow-x-auto no-scrollbar flex gap-2 shrink-0">
                             <button v-for="layer in guildData.labyrinth" :key="layer.id" @click="selectedLayer = layer.id"
                                 class="px-3 py-1.5 rounded-full border text-[11px] font-bold whitespace-nowrap transition-all"
-                                :class="selectedLayer === layer.id ? 'bg-white text-magic-dark border-white' : 'bg-black/30 text-gray-400 border-white/10'">
-                                {{ layer.name }}
-                            </button>
+                                :class="selectedLayer === layer.id ? 'bg-white text-magic-dark border-white' : 'bg-black/30 text-gray-400 border-white/10'">{{ layer.name }}</button>
                         </div>
                         <div class="flex-1 scroller px-4 pb-24 relative">
                             <div v-if="currentLayerData" class="animate-fade-in">
@@ -238,18 +243,13 @@
                                     <p class="text-xs text-gray-300 leading-relaxed">{{ currentLayerData.desc }}</p>
                                 </div>
                                 <div class="space-y-4">
-                                    <div v-for="(spot, idx) in currentLayerData.spots" :key="idx" 
-                                         class="bg-black/20 rounded-xl p-3 border border-white/5 relative">
+                                    <div v-for="(spot, idx) in currentLayerData.spots" :key="idx" class="bg-black/20 rounded-xl p-3 border border-white/5 relative">
                                         <div class="flex justify-between items-start mb-2">
-                                            <h4 class="text-sm font-bold text-white"><span class="mr-2 opacity-70">{{ idx + 1 }}.</span>{{ spot.name }}</h4>
-                                            <a :href="spot.map" target="_blank" class="w-6 h-6 rounded-full bg-white/10 flex items-center justify-center text-magic-ice hover:bg-white/20">
-                                                <i class="fa-solid fa-location-arrow text-[10px]"></i>
-                                            </a>
+                                            <h4 class="text-base font-bold text-white"><span class="mr-2 opacity-70">{{ idx + 1 }}.</span>{{ spot.name }}</h4>
+                                            <a :href="spot.map" target="_blank" class="w-6 h-6 rounded-full bg-white/10 flex items-center justify-center text-magic-ice hover:bg-white/20"><i class="fa-solid fa-location-arrow text-[10px]"></i></a>
                                         </div>
                                         <ul v-if="spot.items" class="space-y-1.5">
-                                            <li v-for="item in spot.items" :key="item" class="text-[11px] text-gray-400 flex items-start gap-1.5 pl-1 border-l border-white/10">
-                                                <span class="text-white/60">▪</span> {{ item }}
-                                            </li>
+                                            <li v-for="item in spot.items" :key="item" class="text-[11px] text-gray-400 flex items-start gap-1.5 pl-1 border-l border-white/10"><span class="text-white/60">▪</span> {{ item }}</li>
                                         </ul>
                                         <p v-else class="text-[11px] text-gray-400 pl-1">{{ spot.desc }}</p>
                                     </div>
@@ -257,16 +257,12 @@
                             </div>
                         </div>
                     </div>
-
                     <div v-else-if="guildSubTab === 'kyoto'" class="flex-1 flex flex-col min-h-0 animate-fade-in">
                         <div class="px-4 pb-2 flex gap-2 shrink-0 justify-center">
                             <button v-for="layer in guildData.kyoto" :key="layer.id" @click="selectedKyotoLayer = layer.id"
                                 class="flex-1 py-1.5 rounded-full border text-[11px] font-bold whitespace-nowrap transition-all text-center"
-                                :class="selectedKyotoLayer === layer.id ? 'bg-white text-magic-dark border-white' : 'bg-black/30 text-gray-400 border-white/10'">
-                                {{ layer.name }}
-                            </button>
+                                :class="selectedKyotoLayer === layer.id ? 'bg-white text-magic-dark border-white' : 'bg-black/30 text-gray-400 border-white/10'">{{ layer.name }}</button>
                         </div>
-
                         <div class="flex-1 scroller px-4 pb-24 relative">
                             <div v-if="currentKyotoData" class="animate-fade-in">
                                 <div class="glass-panel rounded-2xl p-4 mb-4 border-l-4" :class="currentKyotoData.colorClass">
@@ -280,7 +276,6 @@
                                     </div>
                                     <p v-else class="text-xs text-gray-300 leading-relaxed">{{ currentKyotoData.desc }}</p>
                                 </div>
-
                                 <div v-if="currentKyotoData.zones" class="mb-6">
                                     <h4 class="text-sm font-bold text-magic-ice mb-3 border-b border-white/10 pb-1">主要地標</h4>
                                     <div v-for="(zone, idx) in currentKyotoData.zones" :key="idx" class="bg-black/20 rounded-xl p-3 border border-white/5 mb-3">
@@ -293,21 +288,18 @@
                                         </div>
                                     </div>
                                 </div>
-
                                 <div class="space-y-4">
                                     <h4 class="text-sm font-bold text-magic-ice mb-2 border-b border-white/10 pb-1">據點列表</h4>
                                     <div v-for="(spot, idx) in currentKyotoData.spots" :key="idx" class="bg-black/20 rounded-xl p-3 border border-white/5 relative">
                                         <div class="flex justify-between items-start mb-2">
                                             <div>
                                                 <h4 class="text-sm font-bold text-white">{{ spot.name }}</h4>
-                                                <span class="text-[10px] text-magic-ice block">{{ spot.rpgName }}</span>
+                                                <span class="text-[12px] text-magic-ice block">{{ spot.rpgName }}</span>
                                             </div>
-                                            <a :href="spot.map" target="_blank" class="w-6 h-6 rounded-full bg-white/10 flex items-center justify-center text-magic-ice hover:bg-white/20">
-                                                <i class="fa-solid fa-location-arrow text-[10px]"></i>
-                                            </a>
+                                            <a :href="spot.map" target="_blank" class="w-6 h-6 rounded-full bg-white/10 flex items-center justify-center text-magic-ice hover:bg-white/20"><i class="fa-solid fa-location-arrow text-[10px]"></i></a>
                                         </div>
-                                        <p class="text-[11px] text-gray-400 leading-relaxed">{{ spot.desc }}</p>
-                                        <p class="text-[10px] text-yellow-200/80 mt-1 pl-1 border-l-2 border-yellow-500/50" v-if="spot.bonus">Bonus: {{ spot.bonus }}</p>
+                                        <p class="text-[13px] text-gray-300 leading-relaxed">{{ spot.desc }}</p>
+                                        <p class="text-[11px] text-yellow-200/80 mt-1 pl-1 border-l-2 border-yellow-500/50" v-if="spot.bonus">Bonus: {{ spot.bonus }}</p>
                                     </div>
                                 </div>
                             </div>
@@ -315,127 +307,409 @@
                     </div>
                 </div>
 
-                <!-- 補給：迷宮飯◆大阪 / 靈脈礦石◇京都 -->
                 <div v-else-if="currentTab === 'supply'" class="flex flex-col h-full min-h-0 font-serif">
-                    <!-- 分頁按鈕 -->
                     <div class="px-4 pt-3 pb-2 flex gap-3 overflow-x-auto no-scrollbar shrink-0">
-                        <button
-                            v-for="tab in supplyTabs"
-                            :key="tab.id"
-                            @click="supplySubTab = tab.id"
+                        <button v-for="tab in supplyTabs" :key="tab.id" @click="supplySubTab = tab.id"
                             class="relative flex-1 min-w-[140px] px-3 py-2 rounded-2xl border text-xs font-bold tracking-widest flex items-center justify-center gap-2 transition-all duration-300"
-                            :class="supplySubTab === tab.id
-                                ? 'bg-white/10 border-white/70 text-white shadow-[0_0_18px_rgba(255,255,255,0.55)] -translate-y-0.5'
-                                : 'bg-black/30 border-white/10 text-gray-400'">
-                            <!-- 柔和白光外圈 -->
-                            <div
-                                v-if="supplySubTab === tab.id"
-                                class="absolute inset-0 rounded-2xl pointer-events-none">
-                                <div class="absolute -inset-2 rounded-3xl bg-white/20 blur-xl opacity-80"></div>
-                            </div>
+                            :class="supplySubTab === tab.id ? 'bg-white/10 border-white/70 text-white shadow-[0_0_18px_rgba(255,255,255,0.55)] -translate-y-0.5' : 'bg-black/30 border-white/10 text-gray-400'">
+                            <div v-if="supplySubTab === tab.id" class="absolute inset-0 rounded-2xl pointer-events-none"><div class="absolute -inset-2 rounded-3xl bg-white/20 blur-xl opacity-80"></div></div>
                             <i :class="tab.icon" class="relative text-base"></i>
                             <span class="relative whitespace-nowrap">{{ tab.label }}</span>
                         </button>
                     </div>
-
-                    <!-- 說明文字 -->
                     <div class="px-5 pb-1 shrink-0 text-center">
-                        <p v-if="supplySubTab === 'osaka'" class="text-[11px] text-gray-300 leading-relaxed">
-                            迷宮飯：記錄大阪地下城的補給料理與便當道具，適合出發前規劃戰場糧食。
-                        </p>
-                        <p v-else class="text-[11px] text-gray-300 leading-relaxed">
-                            靈脈礦石：記錄京都妖都的礦石與護符素材，用來強化裝備與穩定靈脈。
-                        </p>
+                        <p v-if="supplySubTab === 'osaka'" class="text-[11px] text-gray-300 leading-relaxed">迷宮飯：記錄大阪地下城的補給料理與便當道具，適合出發前規劃戰場糧食。</p>
+                        <p v-else class="text-[11px] text-gray-300 leading-relaxed">靈脈礦石：記錄京都妖都的礦石與護符素材，用來強化裝備與穩定靈脈。</p>
                     </div>
-
-                    <!-- 補給列表（隱藏卷軸可滑動） -->
                     <div class="flex-1 scroller no-scrollbar px-4 pb-24">
                         <div class="mb-3 mt-1 text-center">
-                            <h3 class="text-lg font-cursive text-magic-ice">
-                                {{ supplySubTab === 'osaka' ? 'Labyrinth Meals' : 'Spirit Ores' }}
-                            </h3>
-                            <p class="text-[11.5px] text-gray-200 tracking-widest">
-                               {{ supplySubTab === 'osaka'
-                                   ? '迷宮補給☆體力與士氣的來源'
-                                   : '靈脈凝結★強化護符與防禦'
-                               }}
-</p>
+                            <h3 class="text-lg font-cursive text-magic-ice">{{ supplySubTab === 'osaka' ? 'Labyrinth Meals' : 'Spirit Ores' }}</h3>
+                            <p class="text-[11.5px] text-gray-200 tracking-widest">{{ supplySubTab === 'osaka' ? '迷宮補給☆體力與士氣的來源' : '靈脈凝結★強化護符與防禦' }}</p>
                         </div>
-
                         <div v-if="currentSupplyList.length === 0" class="flex flex-col items-center justify-center py-10 text-gray-500">
-                            <i class="fa-solid" :class="supplySubTab === 'osaka' ? 'fa-bowl-rice' : 'fa-gem'" class="text-2xl mb-3"></i>
+                            <i class="fa-solid text-2xl mb-3" :class="supplySubTab === 'osaka' ? 'fa-bowl-rice' : 'fa-gem'"></i>
                             <p class="text-xs">尚未記錄補給品...</p>
                         </div>
-
                         <div v-else class="space-y-3">
-                            <div
-                                v-for="(item, idx) in currentSupplyList"
-                                :key="idx"
-                                class="glass-panel rounded-2xl p-3 border border-white/10 relative overflow-hidden">
-                                
-                                <!-- 背景柔光 -->
+                            <div v-for="(item, idx) in currentSupplyList" :key="idx" class="glass-panel rounded-2xl p-3 border border-white/10 relative overflow-hidden">
                                 <div class="absolute -right-8 -top-10 w-24 h-24 rounded-full bg-white/5 blur-3xl opacity-60"></div>
-
                                 <div class="relative flex justify-between items-start mb-1">
                                     <div>
-                                        <p class="text-[10px] text-gray-400 mb-0.5">
-                                            #{{ idx + 1 }} · {{ item.type }}
-                                        </p>
-                                        <h4 class="text-sm font-bold text-white leading-snug">
-                                            {{ item.name }}
-                                        </h4>
+                                        <p class="text-[10px] text-gray-400 mb-0.5">#{{ idx + 1 }} · {{ item.type }}</p>
+                                        <h4 class="text-sm font-bold text-white leading-snug">{{ item.name }}</h4>
                                     </div>
                                     <div class="flex flex-col items-end gap-1">
-                                        <span class="text-[11px] text-magic-ice font-mono bg-black/40 px-2 py-0.5 rounded-full">
-                                            {{ item.price }}
-                                        </span>
-                                        <span class="text-[10px] text-gray-400" v-if="item.rarity">
-                                            {{ item.rarity }}
-                                        </span>
+                                        <span class="text-[11px] text-magic-ice font-mono bg-black/40 px-2 py-0.5 rounded-full">{{ item.price }}</span>
+                                        <span class="text-[10px] text-gray-400" v-if="item.rarity">{{ item.rarity }}</span>
                                     </div>
                                 </div>
-
-                                <p class="relative text-[11px] text-gray-300 leading-relaxed mt-1 whitespace-pre-line">
-                                    {{ item.desc }}
-                                </p>
-
+                                <p class="relative text-[11px] text-gray-300 leading-relaxed mt-1 whitespace-pre-line">{{ item.desc }}</p>
                                 <div class="relative mt-2 flex flex-wrap items-center justify-between gap-1 text-[10px]">
-                                    <span v-if="item.place" class="text-gray-400 flex items-center gap-1">
-                                        <i class="fa-solid fa-location-dot text-magic-ice/80"></i>
-                                        {{ item.place }}
-                                    </span>
-                                    <span v-if="item.note" class="text-yellow-200/90 flex items-center gap-1">
-                                        <i class="fa-solid fa-star"></i>
-                                        {{ item.note }}
-                                    </span>
+                                    <span v-if="item.place" class="text-gray-400 flex items-center gap-1"><i class="fa-solid fa-location-dot text-magic-ice/80"></i> {{ item.place }}</span>
+                                    <span v-if="item.note" class="text-yellow-200/90 flex items-center gap-1"><i class="fa-solid fa-star"></i> {{ item.note }}</span>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- 其它頁籤（暫留） -->
+                <div v-else-if="currentTab === 'coins'" class="flex flex-col h-full min-h-0 font-serif">
+                    
+                    <div class="px-4 py-2 shrink-0 flex gap-2">
+                        <button v-for="sub in coinTabs" :key="sub.id" @click="coinSubTab = sub.id"
+                            class="flex-1 py-1.5 rounded-lg border flex items-center justify-center gap-2 transition-all duration-300 relative overflow-hidden"
+                            :class="coinSubTab === sub.id ? 'bg-magic-blue/10 border-magic-blue text-white shadow-[0_0_10px_rgba(167,215,255,0.2)]' : 'bg-black/20 border-white/5 text-gray-400'">
+                            <i :class="sub.icon" class="text-xs"></i>
+                            <span class="text-xs font-bold tracking-widest">{{ sub.label }}</span>
+                            <div v-if="coinSubTab === sub.id" class="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent w-full animate-slide-up opacity-30"></div>
+                        </button>
+                    </div>
+
+                    <div v-if="coinSubTab === 'ledger'" class="flex-1 flex flex-col min-h-0 animate-fade-in">
+                        
+                        <div class="shrink-0 px-4 py-1 overflow-x-auto no-scrollbar flex gap-3 snap-x mb-1">
+                            <button v-for="chap in chapters" :key="chap.id" @click="selectedChapter = chap.id"
+                                class="snap-start shrink-0 px-4 py-2 rounded-xl border transition-all duration-300 relative group flex flex-col items-center min-w-[80px]"
+                                :class="selectedChapter === chap.id ? 'bg-magic-blue/10 border-magic-blue' : 'bg-black/20 border-white/5'">
+                                <span class="text-[10px] tracking-widest mb-0.5" :class="selectedChapter === chap.id ? 'text-magic-blue' : 'text-gray-500'">{{ chap.label }}</span>
+                                <span class="text-xs font-bold font-mono" :class="selectedChapter === chap.id ? 'text-white text-glow' : 'text-gray-400'">{{ chap.dateShort }}</span>
+                                
+                                <div v-if="selectedChapter === chap.id" class="absolute -bottom-1 w-8 h-0.5 bg-magic-blue blur-[2px] rounded-full"></div>
+                            </button>
+                        </div>
+
+                        <div class="shrink-0 px-4 pt-2 mb-2 relative z-20">
+                            <div class="glass-panel rounded-2xl p-5 shadow-lg relative overflow-hidden">
+                                <div class="absolute -right-10 -top-10 w-40 h-40 bg-magic-blue/10 rounded-full blur-3xl pointer-events-none"></div>
+
+                                <div class="flex items-start justify-between relative z-10">
+                                    <div>
+                                        <p class="text-[10px] tracking-[0.1em] text-magic-blue/80 mb-1 font-bold">
+                                            {{ currentChapterInfo.fullTitle }}
+                                        </p>
+                                        <p class="text-[11px] tracking-[0.25em] text-magic-silver/60">
+                                            今日花費
+                                        </p>
+                                        <p class="mt-1 text-3xl font-semibold text-white font-mono drop-shadow-[0_0_8px_rgba(167,215,255,0.3)]">
+                                            {{ formatMoney(todayTotalTWD) }}
+                                            <span class="text-sm font-medium text-magic-blue ml-1 font-serif">
+                                                加隆
+                                            </span>
+                                        </p>
+                                        <p class="text-[11px] text-gray-400 font-mono mt-1">
+                                            ≈ ¥ {{ formatMoney(todayTotalYen) }} 
+                                            <span class="mx-1 text-gray-600">|</span> 
+                                            累計: {{ formatMoney(grandTotalTWD) }} G♢
+                                        </p>
+                                    </div>
+
+                                    <div class="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-magic-night/60 border border-magic-blue/30 shadow-inner">
+                                        <i class="fa-solid fa-pen-nib text-magic-blue text-xs"></i>
+                                        <span class="text-[10px] text-magic-silver tracking-wide">
+                                            記帳中
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <div class="mt-4 mb-3 h-px bg-gradient-to-r from-transparent via-magic-blue/40 to-transparent"></div>
+
+                                <div class="text-center">
+                                    <p class="text-[10px] text-magic-silver/80 italic leading-relaxed">
+                                        <i class="fa-solid fa-wand-magic-sparkles mr-1 text-magic-blue"></i> 
+                                        {{ magicSummaryQuote }}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex-1 scroller px-4 pb-24 relative z-10">
+                            <div v-if="currentChapterExpenses.length === 0" class="rounded-xl border border-dashed border-magic-blue/30 bg-black/20 px-4 py-8 flex items-center gap-4 mt-2">
+                                <div class="flex h-12 w-12 items-center justify-center rounded-full bg-magic-blue/10 border border-magic-blue/30 animate-pulse-slow">
+                                    <i class="fa-solid fa-moon text-magic-blue text-xl"></i>
+                                </div>
+                                <div>
+                                    <p class="text-sm text-white font-bold">
+                                        本章節尚未留下任何消費魔法痕跡
+                                    </p>
+                                    <p class="mt-1 text-xs text-magic-silver/70 leading-relaxed">
+                                        輕點右下角 <i class="fa-solid fa-plus text-[10px] bg-magic-blue text-magic-night rounded-full w-3 h-3 inline-flex items-center justify-center mx-0.5"></i>
+                                        開始記錄你的第一筆支出吧。
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div v-else class="space-y-2 mt-1">
+                                <div v-for="item in currentChapterExpenses" :key="item.id" @click="editExpense(item)"
+                                    class="glass-panel rounded-xl flex items-center justify-between px-4 py-3 cursor-pointer active:scale-[0.99] transition-all hover:bg-white/5 border border-white/10 group">
+                                    
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-9 h-9 rounded-full bg-black/40 flex items-center justify-center text-magic-blue border border-white/10 group-hover:border-magic-blue/40 transition-colors shadow-inner">
+                                            <i :class="getExpenseIcon(item.type)" class="text-xs"></i>
+                                        </div>
+                                        <div>
+                                            <p class="text-sm text-white font-bold leading-none mb-1.5">
+                                                {{ item.title || '未命名支出' }}
+                                            </p>
+                                            <div class="flex items-center gap-2">
+                                                <span class="text-[10px] text-magic-blue/70 bg-magic-blue/10 px-1.5 py-0.5 rounded">
+                                                    {{ getExpenseLabel(item.type).split('(')[0] }}
+                                                </span>
+                                                <i :class="getPaymentIcon(item.payment)" class="text-[10px] text-gray-500"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="text-right">
+                                        <p class="text-sm font-bold text-amber-200 font-mono">
+                                            {{ formatMoney(item.twd) }} <span class="text-[10px] text-amber-200/70">G♢</span>
+                                        </p>
+                                        <p class="text-[10px] text-gray-500 font-mono mt-0.5">
+                                            ¥ {{ formatMoney(item.yen) }}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button @click="openExpenseModal('add')" 
+                            class="absolute bottom-24 right-5 w-14 h-14 rounded-full bg-magic-night border border-magic-blue text-magic-blue shadow-[0_0_20px_rgba(167,215,255,0.3)] flex items-center justify-center text-2xl active:scale-90 transition-transform z-30 group overflow-hidden">
+                            <div class="absolute inset-0 bg-magic-blue/20 rounded-full scale-0 group-active:scale-150 transition-transform duration-300"></div>
+                            <i class="fa-solid fa-plus relative z-10"></i>
+                        </button>
+                    </div>
+
+                    <div v-else-if="coinSubTab === 'stats'" class="flex-1 scroller px-4 pb-24 pt-2 animate-fade-in">
+                        
+                        <div class="ice-card rounded-2xl p-5 mb-4 flex flex-col items-center">
+                            <h3 class="text-sm font-bold text-white mb-4 w-full flex items-center gap-2">
+                                <i class="fa-solid fa-chart-pie text-magic-blue"></i> 加隆屬性分布
+                            </h3>
+                            <div class="relative w-48 h-48 mb-4">
+                                <div class="w-full h-full pie-chart" :style="{ background: pieChartGradient }"></div>
+                                <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none z-10">
+                                    <span class="text-[10px] text-gray-400">總消耗</span>
+                                    <span class="text-lg font-bold text-white font-mono">{{ formatMoney(grandTotalTWD) }}</span>
+                                    <span class="text-[10px] text-magic-blue">G♢</span>
+                                </div>
+                            </div>
+                            <div class="w-full grid grid-cols-2 gap-2">
+                                <div v-for="cat in pieChartData" :key="cat.type" class="flex items-center gap-2 text-[11px]">
+                                    <div class="w-2 h-2 rounded-full shadow-[0_0_5px]" :style="{ background: cat.color, boxShadow: `0 0 5px ${cat.color}` }"></div>
+                                    <span class="text-gray-300 flex-1 truncate">{{ cat.label.split('(')[0] }}</span>
+                                    <span class="text-white font-mono">{{ Math.round(cat.percent) }}%</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="ice-card rounded-2xl p-5 mb-4">
+                            <h3 class="text-sm font-bold text-white mb-4 w-full flex items-center gap-2">
+                                <i class="fa-solid fa-wave-square text-magic-blue"></i> 加隆流動曲線
+                            </h3>
+                            <div class="h-40 w-full relative flex items-end justify-between px-2">
+                                <svg class="absolute inset-0 w-full h-full" overflow="visible">
+                                    <defs>
+                                        <linearGradient id="lineGradient" x1="0" y1="0" x2="0" y2="1">
+                                            <stop offset="0%" stop-color="#A7D7FF" stop-opacity="0.5"/>
+                                            <stop offset="100%" stop-color="#A7D7FF" stop-opacity="0"/>
+                                        </linearGradient>
+                                    </defs>
+                                    <path :d="lineChartAreaPath" fill="url(#lineGradient)" stroke="none" />
+                                    <path :d="lineChartPath" fill="none" stroke="#A7D7FF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="drop-shadow-[0_0_5px_rgba(167,215,255,0.8)]"/>
+                                    <circle v-for="dot in lineChartDots" :key="dot.x" :cx="dot.x" :cy="dot.y" r="3" fill="#2E3338" stroke="#A7D7FF" stroke-width="2" />
+                                </svg>
+                            </div>
+                            <div class="flex justify-between mt-2 px-1">
+                                <span v-for="chap in chapters" :key="chap.id" class="text-[9px] text-gray-500 font-mono">{{ chap.label.replace('第','').replace('章','') }}</span>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-2 mb-3 mt-6 px-1">
+                            <i class="fa-solid fa-calendar-days text-magic-blue"></i>
+                            <h3 class="text-sm font-bold text-white tracking-widest">章節花費摘要</h3>
+                        </div>
+
+                        <div class="space-y-3">
+                             <div v-for="chap in chapters" :key="chap.id" class="ice-card rounded-xl p-3 border-l-2 border-l-magic-blue/50">
+                                 <div class="flex justify-between items-center mb-1">
+                                     <span class="text-xs font-bold text-magic-blue">{{ chap.fullTitle }}</span>
+                                     <span class="text-xs text-white font-mono">{{ formatMoney(getChapterTotal(chap.id)) }} G♢</span>
+                                 </div>
+                                 <div class="flex justify-between items-center text-[10px] text-gray-400">
+                                     <span class="italic opacity-80">{{ getChapterSummarySentence(chap.id) }}</span>
+                                 </div>
+                             </div>
+                        </div>
+                    </div>
+
+                    <div v-else-if="coinSubTab === 'settings'" class="flex-1 px-4 pt-4 animate-fade-in">
+                        <div class="ice-card rounded-2xl p-6 text-center relative overflow-hidden">
+                            <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-magic-blue to-transparent opacity-50"></div>
+                            <i class="fa-solid fa-scale-balanced text-3xl text-magic-blue mb-4 drop-shadow-[0_0_10px_rgba(167,215,255,0.5)]"></i>
+                            <h3 class="text-lg font-bold text-white mb-1">加隆匯率設定</h3>
+                            <p class="text-xs text-gray-400 mb-6">1 G♢ (加隆) = {{ exchangeRate }} ¥ (日幣)</p>
+                            
+                            <div class="relative max-w-[200px] mx-auto mb-4">
+                                <label class="block text-[10px] text-magic-blue text-left mb-1 ml-1">今日匯率 (TWD/JPY)</label>
+                                <input type="number" step="0.0001" v-model="exchangeRate" class="magic-input text-center font-mono text-xl">
+                                <div class="absolute right-3 top-8 text-xs text-gray-500">Rate</div>
+                            </div>
+
+                            <p class="text-[10px] text-magic-silver">
+                                <i class="fa-regular fa-clock mr-1"></i> 加隆匯率更新於 {{ lastRateUpdate }}
+                            </p>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div v-else-if="currentTab === 'bag'" class="flex flex-col h-full min-h-0 font-serif">
+                    <div class="flex-1 scroller px-4 pb-24 space-y-5 animate-fade-in pt-3">
+                        
+                        <div class="glass-panel rounded-2xl p-4 border border-white/10">
+                            <h3 class="text-lg font-bold text-white mb-3 flex items-center gap-2"><i class="fa-solid fa-plane-departure text-magic-ice"></i> 飛行日誌</h3>
+                            <div class="mb-4">
+                                <div class="flex items-center gap-2 mb-2">
+                                    <span class="px-2 py-0.5 rounded-md bg-blue-900/50 border border-blue-400/30 text-[10px] text-blue-200 font-bold">Main Team</span>
+                                    <span class="h-[1px] flex-1 bg-white/10"></span>
+                                </div>
+                                <div class="grid grid-cols-2 gap-2 text-xs">
+                                    <div class="bg-black/20 p-2 rounded-lg border border-white/5">
+                                        <div class="flex justify-between items-center mb-1"><span class="text-gray-400 text-[10px]">啟程 12/14</span><span class="font-mono text-magic-ice">CI156</span></div>
+                                        <div class="flex justify-between items-end">
+                                            <div><div class="font-bold text-white text-sm">08:05</div><div class="text-[10px] text-gray-500">TPE T2</div></div>
+                                            <i class="fa-solid fa-arrow-right text-gray-600 text-[10px] mb-1"></i>
+                                            <div class="text-right"><div class="font-bold text-white text-sm">11:35</div><div class="text-[10px] text-gray-500">KIX T1</div></div>
+                                        </div>
+                                    </div>
+                                    <div class="bg-black/20 p-2 rounded-lg border border-white/5">
+                                        <div class="flex justify-between items-center mb-1"><span class="text-gray-400 text-[10px]">回程 12/20</span><span class="font-mono text-magic-ice">CI173</span></div>
+                                        <div class="flex justify-between items-end">
+                                            <div><div class="font-bold text-white text-sm">19:00</div><div class="text-[10px] text-gray-500">KIX T1</div></div>
+                                            <i class="fa-solid fa-arrow-right text-gray-600 text-[10px] mb-1"></i>
+                                            <div class="text-right"><div class="font-bold text-white text-sm">21:15</div><div class="text-[10px] text-gray-500">TPE T2</div></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="flex items-center gap-2 mb-2">
+                                    <span class="px-2 py-0.5 rounded-md bg-purple-900/50 border border-purple-400/30 text-[10px] text-purple-200 font-bold">Sub Team</span>
+                                    <span class="h-[1px] flex-1 bg-white/10"></span>
+                                </div>
+                                <div class="grid grid-cols-2 gap-2 text-xs">
+                                    <div class="bg-black/20 p-2 rounded-lg border border-white/5">
+                                        <div class="flex justify-between items-center mb-1"><span class="text-gray-400 text-[10px]">啟程 12/17</span><span class="font-mono text-purple-300">GK50</span></div>
+                                        <div class="flex justify-between items-end">
+                                            <div><div class="font-bold text-white text-sm">02:30</div><div class="text-[10px] text-gray-500">TPE T1</div></div>
+                                            <i class="fa-solid fa-arrow-right text-gray-600 text-[10px] mb-1"></i>
+                                            <div class="text-right"><div class="font-bold text-white text-sm">06:00</div><div class="text-[10px] text-gray-500">KIX T1</div></div>
+                                        </div>
+                                    </div>
+                                    <div class="bg-black/20 p-2 rounded-lg border border-white/5">
+                                        <div class="flex justify-between items-center mb-1"><span class="text-gray-400 text-[10px]">回程 12/20</span><span class="font-mono text-purple-300">MM027</span></div>
+                                        <div class="flex justify-between items-end">
+                                            <div><div class="font-bold text-white text-sm">15:25</div><div class="text-[10px] text-gray-500">KIX T2</div></div>
+                                            <i class="fa-solid fa-arrow-right text-gray-600 text-[10px] mb-1"></i>
+                                            <div class="text-right"><div class="font-bold text-white text-sm">17:55</div><div class="text-[10px] text-gray-500">TPE T1</div></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="glass-panel rounded-2xl p-4 border border-white/10">
+                            <h3 class="text-lg font-bold text-white mb-3 flex items-center gap-2"><i class="fa-solid fa-list-check text-magic-ice"></i> 出發檢核術式</h3>
+                            <div class="space-y-2">
+                                <label v-for="(item, idx) in checklistItems" :key="idx" 
+                                    class="flex items-center gap-3 p-3 bg-black/20 rounded-xl cursor-pointer hover:bg-black/30 transition-colors border border-white/5 active:scale-[0.98]">
+                                    <input type="checkbox" v-model="item.checked" class="magic-checkbox shrink-0">
+                                    <span class="text-sm transition-all duration-300 select-none" 
+                                          :class="item.checked ? 'text-gray-600 line-through decoration-magic-ice decoration-2' : 'text-gray-200'">
+                                        {{ item.label }}
+                                    </span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="glass-panel rounded-2xl p-4 border border-white/10 relative overflow-hidden">
+                            <div class="absolute -right-6 -bottom-6 text-8xl text-indigo-500/10"><i class="fa-solid fa-hotel"></i></div>
+                            <div class="flex justify-between items-start mb-2 relative">
+                                <h3 class="text-lg font-bold text-white flex items-center gap-2"><i class="fa-solid fa-bed text-magic-ice"></i> 隱者之灯</h3>
+                                <a href="https://www.hotelforza.jp/kyotoshijo/" target="_blank" class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-magic-ice hover:bg-white/20 active:scale-95 transition-all"><i class="fa-solid fa-link"></i></a>
+                            </div>
+                            <p class="text-sm font-bold text-white mb-1">ホテルフォルツァ京都四条河原町</p>
+                            <p class="text-xs text-gray-300 mb-2 font-mono">TEL 075-254-8251</p>
+                            <p class="text-xs text-gray-400 leading-relaxed border-t border-white/10 pt-2">〒600-8005 京都府京都市下京区四条通麩屋町西入立売東町25-1</p>
+                            <a href="https://maps.app.goo.gl/9Z1jZ1jZ1jZ1jZ1j" target="_blank" class="inline-flex items-center gap-1.5 text-[10px] text-magic-ice mt-2 bg-magic-ice/10 px-2 py-1 rounded-lg"><i class="fa-solid fa-map-location-dot"></i> 開啟地圖</a>
+                        </div>
+
+                        <div class="glass-panel rounded-2xl p-4 border border-white/10">
+                            <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2"><i class="fa-solid fa-shield-heart text-magic-ice"></i> 緊急後援</h3>
+                            
+                            <div class="mb-4 pb-4 border-b border-white/10">
+                                <div class="flex justify-between items-center mb-2">
+                                    <h4 class="text-sm font-bold text-blue-200">守護者的召喚 (大阪辦事處)</h4>
+                                    <a href="https://www.roc-taiwan.org/jposa/cat/64.html" target="_blank" class="text-magic-ice text-xs bg-white/5 px-2 py-1 rounded-lg border border-white/10"><i class="fa-solid fa-link mr-1"></i>官網</a>
+                                </div>
+                                <div class="space-y-2">
+                                    <a href="tel:+81662278623" class="flex items-center gap-3 p-2 bg-blue-900/20 rounded-lg border border-blue-500/20 active:bg-blue-900/40">
+                                        <div class="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center text-blue-300"><i class="fa-solid fa-phone"></i></div>
+                                        <div><div class="text-xs text-gray-400">緊急聯絡</div><div class="text-sm font-mono text-white">06-6227-8623</div></div>
+                                    </a>
+                                    <div class="flex items-start gap-3 p-2">
+                                        <div class="w-8 h-8 rounded-full bg-gray-700/30 flex items-center justify-center text-gray-400 shrink-0"><i class="fa-solid fa-location-dot"></i></div>
+                                        <p class="text-xs text-gray-400 pt-1">大阪市北区中之島二丁目三番一八号 17F/19F</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div>
+                                <h4 class="text-sm font-bold text-red-200 mb-2">祭司的加護 (醫療/協助)</h4>
+                                <div class="grid grid-cols-1 gap-2">
+                                    <a href="https://reurl.cc/vKvDRN" target="_blank" class="flex items-center justify-between p-3 bg-red-900/10 rounded-xl border border-red-500/10 active:bg-red-900/20">
+                                        <span class="text-xs text-red-100"><i class="fa-solid fa-truck-medical mr-2"></i>中文醫療服務清單</span>
+                                        <i class="fa-solid fa-arrow-up-right-from-square text-[10px] text-red-300"></i>
+                                    </a>
+                                    <a href="tel:05038162787" class="flex items-center justify-between p-3 bg-red-900/10 rounded-xl border border-red-500/10 active:bg-red-900/20">
+                                        <div><div class="text-xs text-red-100"><i class="fa-solid fa-headset mr-2"></i>JNTO 訪日旅客呼叫中心</div><div class="text-[10px] text-red-300/70 ml-6">24hr 中文應對</div></div>
+                                        <span class="font-mono text-xs text-red-200">Call</span>
+                                    </a>
+                                    <div class="p-3 bg-red-900/10 rounded-xl border border-red-500/10">
+                                        <div class="text-xs text-red-100 mb-1"><i class="fa-solid fa-star-of-life mr-2"></i>國際 SOS (台北24hr)</div>
+                                        <div class="pl-6 space-y-1">
+                                            <a href="tel:+886225232220" class="block text-xs font-mono text-red-300">+886-2-2523-2220</a>
+                                            <a href="tel:+886912909677" class="block text-xs font-mono text-red-300">+886-912-909-677 (郭先生)</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="glass-panel rounded-2xl p-4 border border-white/10 mb-8">
+                            <h3 class="text-lg font-bold text-white mb-2 flex items-center gap-2"><i class="fa-solid fa-feather-pointed text-magic-ice"></i> 觀測日誌</h3>
+                            <textarea v-model="bagMemo" class="w-full h-40 bg-transparent border border-white/10 rounded-xl p-3 text-sm text-gray-200 placeholder-gray-600 focus:border-magic-ice/50 focus:bg-black/20 outline-none resize-none leading-relaxed font-serif" placeholder="在此記錄旅途中的隨筆、帳務或靈感..."></textarea>
+                        </div>
+                    </div>
+                </div>
+
                 <div v-else class="flex-1 flex items-center justify-center text-gray-500">
                     <p class="text-sm">功能開發中</p>
                 </div>
             </main>
-
-            <!-- 底部導航列 -->
-            <nav class="fixed bottom-0 left-0 right-0 glass-panel border-t border-t-white/15 border-x-0 border-b-0 rounded-t-3xl flex justify-between px-8 items-center pt-1 pb-safe z-40 bg-[#0f172a]/95 backdrop-blur-xl h-[66px]">
+            <nav class="fixed bottom-0 left-0 right-0 glass-panel border-t border-t-white/15 border-x-0 border-b-0 rounded-t-3xl flex justify-between px-6 items-center pt-1 pb-safe z-40 bg-[#0f172a]/95 backdrop-blur-xl h-[70px]">
                 <button v-for="tab in tabs" :key="tab.id" @click="currentTab = tab.id"
-                    class="relative flex flex-col items-center justify-center w-16 gap-0 transition-all duration-300 group"
-                    :class="currentTab === tab.id ? 'text-magic-ice' : 'text-gray-500 hover:text-gray-300'">
+                    class="relative flex flex-col items-center justify-center w-14 gap-0 transition-all duration-300 group"
+                    :class="currentTab === tab.id ? (tab.id === 'coins' ? 'text-magic-blue' : 'text-magic-ice') : 'text-gray-500 hover:text-gray-300'">
                     <div class="relative transition-all duration-300" :class="currentTab === tab.id ? '-translate-y-0.5' : ''">
                         <i :class="tab.icon" class="text-[26px] mb-0.5"></i>
                         <div v-if="currentTab === tab.id" class="absolute -inset-2 bg-magic-ice/20 blur-lg rounded-full"></div>
                     </div>
-                    <span class="text-[12px] font-medium tracking-wide transition-colors duration-300 leading-none" :class="currentTab === tab.id ? 'text-white' : 'text-gray-500 group-hover:text-gray-400'">{{ tab.label }}</span>
+                    <span class="text-[10px] font-medium tracking-wide transition-colors duration-300 leading-none" :class="currentTab === tab.id ? 'text-white' : 'text-gray-500 group-hover:text-gray-400'">{{ tab.label }}</span>
                     <div v-if="currentTab === tab.id" class="absolute -bottom-1 w-1 h-1 bg-magic-ice rounded-full shadow-[0_0_8px_#a5f3fc]"></div>
                 </button>
             </nav>
         </div>
-
-        <!-- 新增 / 編輯 modal -->
+        
         <transition enter-active-class="transition duration-300 ease-out" enter-from-class="translate-y-full opacity-0" enter-to-class="translate-y-0 opacity-100" leave-active-class="transition duration-200 ease-in" leave-from-class="translate-y-0 opacity-100" leave-to-class="translate-y-full opacity-0">
             <div v-if="isModalOpen" class="fixed inset-0 z-[60] flex flex-col justify-end">
                 <div @click="closeModal" class="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity"></div>
@@ -468,7 +742,97 @@
             </div>
         </transition>
 
-        <!-- 召喚使魔 modal -->
+        <transition enter-active-class="transition duration-300 ease-out" enter-from-class="translate-y-full opacity-0" enter-to-class="translate-y-0 opacity-100" leave-active-class="transition duration-200 ease-in" leave-from-class="translate-y-0 opacity-100" leave-to-class="translate-y-full opacity-0">
+            <div v-if="isExpenseModalOpen" class="fixed inset-0 z-[60] flex flex-col justify-end">
+                <div @click="closeExpenseModal" class="absolute inset-0 bg-black/70 backdrop-blur-sm transition-opacity"></div>
+                <div class="bottom-sheet w-full rounded-t-[2rem] p-6 relative z-10 animate-slide-up scroller">
+                    <div class="w-12 h-1 bg-gray-600 rounded-full mx-auto mb-6 opacity-30 shrink-0"></div>
+                    
+                    <div class="flex justify-between items-center mb-6 shrink-0">
+                        <h3 class="text-xl font-bold text-white flex items-center gap-2">
+                            <i class="fa-solid fa-pen-fancy text-magic-blue"></i> 
+                            {{ expenseModalMode === 'add' ? '新增花費紀錄' : '編輯花費紀錄' }}
+                        </h3>
+                        <button @click="closeExpenseModal" class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-gray-400 active:bg-white/10"><i class="fa-solid fa-times"></i></button>
+                    </div>
+
+                    <div class="space-y-5">
+                        <div class="flex gap-4 items-end">
+                            <div class="flex-1">
+                                <label class="text-xs text-magic-blue/70 ml-1 mb-1 block">金額 (JPY)</label>
+                                <div class="relative">
+                                    <span class="absolute left-3 top-3.5 text-gray-400 text-sm">¥</span>
+                                    <input v-model.number="editingExpense.yen" type="number" placeholder="0" class="magic-input pl-8 text-xl font-mono text-white">
+                                </div>
+                            </div>
+                            <div class="flex items-center pb-3 text-gray-500"><i class="fa-solid fa-arrow-right text-xs"></i></div>
+                            <div class="flex-1">
+                                <label class="text-xs text-magic-blue/70 ml-1 mb-1 block">約合 (TWD)</label>
+                                <div class="relative">
+                                    <input :value="calculatedTWD" readonly type="text" class="magic-input text-xl font-mono text-magic-blue bg-magic-blue/5 border-magic-blue/30 text-right pr-10">
+                                    <span class="absolute right-3 top-4 text-[10px] text-magic-blue">G♢</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="text-xs text-magic-blue/70 ml-1 mb-1 block">類別</label>
+                            <div class="grid grid-cols-5 gap-2">
+                                <button v-for="cat in expenseCategories" :key="cat.val" @click="editingExpense.type = cat.val"
+                                    class="flex flex-col items-center justify-center py-1.5 rounded-xl border transition-all relative group overflow-hidden h-14"
+                                    :class="editingExpense.type === cat.val ? 'bg-magic-blue text-magic-night border-magic-blue shadow-[0_0_10px_rgba(167,215,255,0.4)]' : 'bg-white/5 text-gray-400 border-white/10'">
+                                    <i :class="cat.icon" class="text-base mb-0.5 relative z-10"></i>
+                                    <span class="text-[9px] relative z-10 whitespace-nowrap scale-90 origin-center">{{ cat.label.split('(')[0] }}</span>
+                                    <div v-if="editingExpense.type === cat.val" class="absolute inset-0 bg-white/20 animate-pulse-slow z-0"></div>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="text-xs text-magic-blue/70 ml-1 mb-1 block">名稱</label>
+                            <input v-model="editingExpense.title" type="text" placeholder="例如: 晚餐..." class="magic-input">
+                        </div>
+
+                        <div>
+                            <label class="text-xs text-magic-blue/70 ml-1 mb-1 block">付款方式</label>
+                            <div class="flex gap-2">
+                                <button @click="editingExpense.payment = 'cash'" class="flex-1 py-2 rounded-xl border flex items-center justify-center gap-2 transition-all" :class="editingExpense.payment === 'cash' ? 'bg-magic-blue/20 border-magic-blue text-magic-blue' : 'bg-white/5 border-white/10 text-gray-400'">
+                                    <i class="fa-solid fa-coins"></i> <span class="text-xs">現金</span>
+                                </button>
+                                <button @click="editingExpense.payment = 'card'" class="flex-1 py-2 rounded-xl border flex items-center justify-center gap-2 transition-all" :class="editingExpense.payment === 'card' ? 'bg-magic-blue/20 border-magic-blue text-magic-blue' : 'bg-white/5 border-white/10 text-gray-400'">
+                                    <i class="fa-regular fa-credit-card"></i> <span class="text-xs">信用卡</span>
+                                </button>
+                                <button @click="editingExpense.payment = 'suica'" class="flex-1 py-2 rounded-xl border flex items-center justify-center gap-2 transition-all" :class="editingExpense.payment === 'suica' ? 'bg-magic-blue/20 border-magic-blue text-magic-blue' : 'bg-white/5 border-white/10 text-gray-400'">
+                                    <i class="fa-solid fa-train"></i> <span class="text-xs">交通卡</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="text-xs text-magic-blue/70 ml-1 mb-1 block">備註</label>
+                            <input v-model="editingExpense.note" type="text" placeholder="選填..." class="magic-input">
+                        </div>
+
+                        <div v-if="expenseModalMode === 'edit'" class="mt-4 p-3 rounded-xl bg-magic-danger/10 border border-magic-danger/30 text-center" :class="confirmDeleteExpense ? 'block' : 'hidden'">
+                            <p class="text-xs text-magic-danger mb-2"><i class="fa-solid fa-triangle-exclamation mr-1"></i> 這筆花費的魔法痕跡將被永久消散。</p>
+                            <div class="flex gap-2 justify-center">
+                                <button @click="deleteExpense" class="px-4 py-1.5 rounded-lg bg-magic-danger text-white text-xs font-bold">讓它消散</button>
+                                <button @click="confirmDeleteExpense = false" class="px-4 py-1.5 rounded-lg bg-white/10 text-gray-300 text-xs">取消</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-8 mb-6 flex gap-3">
+                        <button v-if="expenseModalMode === 'edit' && !confirmDeleteExpense" @click="confirmDeleteExpense = true" class="w-12 h-12 rounded-2xl border border-magic-danger/30 text-magic-danger flex items-center justify-center active:scale-95"><i class="fa-solid fa-trash"></i></button>
+                        <button @click="saveExpense" class="flex-1 bg-magic-blue text-magic-night py-3.5 rounded-2xl font-bold text-lg shadow-[0_0_20px_rgba(167,215,255,0.4)] active:scale-95 transition-transform flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-check"></i> {{ expenseModalMode === 'add' ? '記錄' : '更新' }}
+                        </button>
+                    </div>
+                    <div class="h-24 w-full shrink-0"></div>
+                </div>
+            </div>
+        </transition>
+
         <div v-if="showChatModal" class="fixed inset-0 z-[60] flex items-center justify-center p-6 bg-black/80 backdrop-blur-sm animate-fade-in">
             <div class="w-full max-w-sm glass-panel rounded-3xl p-6 relative bg-[#0f172a]">
                 <button @click="toggleAI" class="absolute top-4 right-4 text-white w-8 h-8 flex items-center justify-center rounded-full bg-white/10"><i class="fa-solid fa-times"></i></button>
@@ -478,47 +842,79 @@
                 </div>
             </div>
         </div>
-
     </div>
-
     <script>
         const { createApp, ref, computed, onMounted, nextTick, watch } = Vue;
-
         createApp({
             setup() {
                 const isLoading = ref(true);
-                const currentTab = ref('journal');
-                const guildSubTab = ref('castle'); // 公會分頁
-                const selectedLayer = ref('layer1'); // 大阪迷宮層級
-                const selectedKyotoLayer = ref('layer1'); // 京都靈脈層級
+                const currentTab = ref('coins');
+                // Guild
+                const guildSubTab = ref('castle');
+                const selectedLayer = ref('layer1');
+                const selectedKyotoLayer = ref('layer1');
+                
+                // Journal
                 const selectedDate = ref('2025-12-14');
                 const showChatModal = ref(false);
                 const isModalOpen = ref(false);
                 const modalMode = ref('add');
                 const confirmDelete = ref(false);
-                
                 const editingEvent = ref({ id: null, time: '', title: '', desc: '', type: 'sightseeing', link: '', linkText: '' });
 
+                // Supply
+                const supplySubTab = ref('osaka');
+
+                // Bag
+                const bagMemo = ref('');
+                const checklistItems = ref([
+                    { label: '通行證 (護照)', checked: false },
+                    { label: '入境許可術式 (Visit Japan Web)', checked: false },
+                    { label: '金幣 (日幣)', checked: false },
+                    { label: '魔法契約卡 (信用卡)', checked: false },
+                    { label: '煉金藥包 (常備藥)', checked: false },
+                    { label: '體力增強劑 (保健品)', checked: false },
+                    { label: '魔導終端晶片 (ESIM/網卡)', checked: false },
+                    { label: '留影水晶 (相機)', checked: false },
+                ]);
+
+                // Coins / Ledger
+                const coinSubTab = ref('ledger');
+                const selectedChapter = ref('ch1');
+                const exchangeRate = ref(0.205);
+                const lastRateUpdate = ref('12/10 08:30');
+                const isExpenseModalOpen = ref(false);
+                const expenseModalMode = ref('add');
+                const confirmDeleteExpense = ref(false);
+                const editingExpense = ref({ id: null, chapterId: 'ch1', type: 'potion', title: '', yen: null, twd: 0, payment: 'cash', note: '' });
+
+                // --- Shared Data ---
                 const headerTitle = computed(() => {
                     if (currentTab.value === 'journal') return '騎士團討伐魔王遠征隊';
                     if (currentTab.value === 'guild') return '公會情報分析';
                     if (currentTab.value === 'supply') return '補給庫：迷宮飯與靈脈礦石';
+                    if (currentTab.value === 'coins') return '旅人魔導書';
+                    if (currentTab.value === 'bag') return '冒險者行囊';
                     return '騎士團遠征系統';
                 });
                 const headerSubtitle = computed(() => {
                     if (currentTab.value === 'journal') return 'The Osaka and Kyoto Journey';
                     if (currentTab.value === 'guild') return 'Guild Intelligence Center';
                     if (currentTab.value === 'supply') return 'Supply Archive & Field Rations';
+                    if (currentTab.value === 'coins') return 'Arcane Ledger & Analytics';
+                    if (currentTab.value === 'bag') return 'Backpack & Logistics';
                     return 'Adventure Management';
                 });
                 const headerIcon = computed(() => {
                     if (currentTab.value === 'journal') return 'fa-solid fa-dragon';
                     if (currentTab.value === 'guild') return 'fa-solid fa-book-journal-whills';
                     if (currentTab.value === 'supply') return 'fa-solid fa-box-archive';
+                    if (currentTab.value === 'coins') return 'fa-solid fa-coins';
+                    if (currentTab.value === 'bag') return 'fa-solid fa-suitcase-rolling';
                     return 'fa-solid fa-scroll';
                 });
 
-
+                // --- Data Definitions ---
                 const days = [
                     { date: '2025-12-14', day: '14', week: 'SUN', chapter: 'Chapter 1', subtitle: '：異界之門開啟' },
                     { date: '2025-12-15', day: '15', week: 'MON', chapter: 'Chapter 2', subtitle: '：白鷺與達摩的試煉' },
@@ -528,7 +924,6 @@
                     { date: '2025-12-19', day: '19', week: 'FRI', chapter: 'Chapter 6', subtitle: '：最終饗宴。鳥貴族慶功' },
                     { date: '2025-12-20', day: '20', week: 'SAT', chapter: 'Chapter 7', subtitle: '：帶回名為「回憶」與「寶藏」的詩篇' },
                 ];
-
                 const eventTypes = [
                     { val: 'sightseeing', label: '景點', icon: 'fa-solid fa-mountain-sun' },
                     { val: 'transport', label: '移動', icon: 'fa-solid fa-train-subway' },
@@ -537,14 +932,12 @@
                     { val: 'hotel', label: '住宿', icon: 'fa-solid fa-bed' },
                     { val: 'ticket', label: '門票', icon: 'fa-solid fa-ticket' },
                 ];
-
-                // 公會資料
+                // Guild Data
                 const guildTabs = [
                     { id: 'castle', label: '魔王城', icon: 'fa-brands fa-fort-awesome' },
                     { id: 'labyrinth', label: '大阪迷宮', icon: 'fa-solid fa-dungeon' },
                     { id: 'kyoto', label: '京都靈脈', icon: 'fa-solid fa-torii-gate' }
                 ];
-
                 const guildData = {
                     castles: [
                         { name: '姬路城 (Himeji Castle)', desc: '別名「白鷺城」。擁有極高物理防禦力的白色巨型要塞，其迷宮般的防禦結構曾讓無數敵軍迷失。是武士時代遺留的最高階神聖遺產。', tips: '攻城戰需消耗大量體力，階梯陡峭請裝備「舒適戰靴」。', photo: '大天守閣正下方仰角、西之丸庭園遠眺。', map: 'https://www.google.com/maps/search/?api=1&query=Himeji+Castle' },
@@ -553,61 +946,63 @@
                     ],
                     labyrinth: [
                         { id: 'layer1', name: '第一層：難波', title: '難波 (Namba)', rpgTitle: '【人類聚集地】', colorClass: 'border-l-blue-400', desc: '迷宮的起點與物資集散地。人流混雜，擁有最強大的電器軍火庫與轉運樞紐。', spots: [
-                            { name: 'EDION 愛電王 難波店', desc: '裝備庫', map: 'https://www.google.com/maps/search/?api=1&query=EDION+Namba', items: ['實惠的 Apple 手機/平板/筆電 (匯率優勢)', '各類電子護符'] },
-                            { name: 'BicCamera 難波店', desc: '大型軍火庫', map: 'https://www.google.com/maps/search/?api=1&query=BicCamera+Namba', items: ['風屬性法杖：Panasonic 吹風機', '風暴神器：Dyson Supersonic', '回春儀式道具：Panasonic 美容儀', '心靈通訊器：Sony/Bose 無線耳機', '次元收納箱：LOJEL 行李箱', '精密計時器：日製手錶', '熱源保存瓶：虎牌保溫瓶', '鍊金電子鍋：象印', '記憶封存板：FUJIFILM 拍立得'] }
+                                { name: 'EDION 愛電王 難波店', desc: '裝備庫', map: 'https://www.google.com/maps/search/?api=1&query=EDION+Namba', items: ['實惠的 Apple 手機/平板/筆電 (匯率優勢)', '各類電子護符'] },
+                                { name: 'BicCamera 難波店', desc: '大型軍火庫', map: 'https://www.google.com/maps/search/?api=1&query=BicCamera+Namba', items: ['風屬性法杖：Panasonic 吹風機', '風暴神器：Dyson Supersonic', '回春儀式道具：Panasonic 美容儀', '心靈通訊器：Sony/Bose 無線耳機', '次元收納箱：LOJEL 行李箱', '精密計時器：日製手錶', '熱源保存瓶：虎牌保溫瓶', '鍊金電子鍋：象印', '記憶封存板：FUJIFILM 拍立得'] }
                         ]},
                         { id: 'layer2', name: '第二層：心齋橋', title: '心齋橋筋 + 道頓堀', rpgTitle: '【獸族領地】', colorClass: 'border-l-orange-500', desc: '充滿慾望與霓虹燈光的繁華領域，巨型招牌如同神獸般俯瞰著冒險者。', spots: [
-                            { name: '固力果跑跑人', desc: '地下城大 BOSS (必拍地標)', map: 'https://www.google.com/maps/search/?api=1&query=Glico+Man+Sign' },
-                            { name: '大丸心齋橋百貨', desc: '獸族交易大殿 (華麗哥德風建築)', map: 'https://www.google.com/maps/search/?api=1&query=Daimaru+Shinsaibashi' },
-                            { name: '心齋橋 PARCO', desc: '多層幻境商城 (潮牌/動漫)', map: 'https://www.google.com/maps/search/?api=1&query=Shinsaibashi+PARCO' },
-                            { name: '惠比壽塔摩天輪', desc: '地下城小 BOSS (黃色迴轉塔)', map: 'https://www.google.com/maps/search/?api=1&query=Don+Quijote+Dotonbori' }
+                                { name: '固力果跑跑人', desc: '地下城大 BOSS (必拍地標)', map: 'https://www.google.com/maps/search/?api=1&query=Glico+Man+Sign' },
+                                { name: '大丸心齋橋百貨', desc: '獸族交易大殿 (華麗哥德風建築)', map: 'https://www.google.com/maps/search/?api=1&query=Daimaru+Shinsaibashi' },
+                                { name: '心齋橋 PARCO', desc: '多層幻境商城 (潮牌/動漫)', map: 'https://www.google.com/maps/search/?api=1&query=Shinsaibashi+PARCO' },
+                                { name: '惠比壽塔摩天輪', desc: '地下城小 BOSS (黃色迴轉塔)', map: 'https://www.google.com/maps/search/?api=1&query=Don+Quijote+Dotonbori' }
                         ]},
                         { id: 'layer3', name: '第三層：日本橋', title: '日本橋商圈', rpgTitle: '【魔族地盤】', colorClass: 'border-l-purple-500', desc: '魔力密度極高的區域，販售禁忌的魔道書(漫畫)、魔像(模型)與稀有卡牌。', spots: [
-                            { name: 'Animate 大阪日本橋', desc: '魔導書類圖書館', map: 'https://www.google.com/maps/search/?api=1&query=Animate+Osaka+Nipponbashi' },
-                            { name: '駿河屋 本館', desc: '二手聖遺物寶庫', map: 'https://www.google.com/maps/search/?api=1&query=Surugaya+Osaka+Nipponbashi' },
-                            { name: 'SUPER KIDS LAND', desc: '機巧兵團總部 (模型)', map: 'https://www.google.com/maps/search/?api=1&query=Super+Kids+Land+Main+Store' },
-                            { name: 'JUNGLE 總店', desc: '特攝與機甲魔像交易所', map: 'https://www.google.com/maps/search/?api=1&query=Jungle+Osaka+Nipponbashi' }
+                                { name: 'Animate 大阪日本橋', desc: '魔導書類圖書館', map: 'https://www.google.com/maps/search/?api=1&query=Animate+Osaka+Nipponbashi' },
+                                { name: '駿河屋 本館', desc: '二手聖遺物寶庫', map: 'https://www.google.com/maps/search/?api=1&query=Surugaya+Osaka+Nipponbashi' },
+                                { name: 'SUPER KIDS LAND', desc: '機巧兵團總部 (模型)', map: 'https://www.google.com/maps/search/?api=1&query=Super+Kids+Land+Main+Store' },
+                                { name: 'JUNGLE 總店', desc: '特攝與機甲魔像交易所', map: 'https://www.google.com/maps/search/?api=1&query=Jungle+Osaka+Nipponbashi' }
                         ]},
                         { id: 'layer4', name: '第四層：梅田', title: '梅田 (Umeda)', rpgTitle: '【精靈族領地】', colorClass: 'border-l-emerald-400', desc: '高聳入雲的玻璃巨塔森林，充滿高級感與秩序，是高階冒險者出沒之地。', spots: [
-                            { name: 'GRAND FRONT OSAKA', desc: '精靈王庭 (北館/南館)', map: 'https://www.google.com/maps/search/?api=1&query=Grand+Front+Osaka' },
-                            { name: 'LUCUA / LUCUA 1100', desc: '時尚精靈市集', map: 'https://www.google.com/maps/search/?api=1&query=LUCUA+Osaka' },
-                            { name: 'Yodobashi 梅田', desc: '精靈科技要塞', map: 'https://www.google.com/maps/search/?api=1&query=Yodobashi+Camera+Multimedia+Umeda' },
-                            { name: '大丸梅田店', desc: '任天堂與寶可夢中心所在地', map: 'https://www.google.com/maps/search/?api=1&query=Daimaru+Umeda' },
-                            { name: 'KITTE 大阪', desc: '新開啟的白之塔', map: 'https://www.google.com/maps/search/?api=1&query=KITTE+Osaka' }
+                                { name: 'GRAND FRONT OSAKA', desc: '精靈王庭 (北館/南館)', map: 'https://www.google.com/maps/search/?api=1&query=Grand+Front+Osaka' },
+                                { name: 'LUCUA / LUCUA 1100', desc: '時尚精靈市集', map: 'https://www.google.com/maps/search/?api=1&query=LUCUA+Osaka' },
+                                { name: 'Yodobashi 梅田', desc: '精靈科技要塞', map: 'https://www.google.com/maps/search/?api=1&query=Yodobashi+Camera+Multimedia+Umeda' },
+                                { name: '大丸梅田店', desc: '任天堂與寶可夢中心所在地', map: 'https://www.google.com/maps/search/?api=1&query=Daimaru+Umeda' },
+                                { name: 'KITTE 大阪', desc: '新開啟的白之塔', map: 'https://www.google.com/maps/search/?api=1&query=KITTE+Osaka' }
                         ]},
-                        { id: 'layer5', name: '第五層：地下街', title: '梅田地下迷宮', rpgTitle: '【黑暗精靈領地・顛倒世界】', colorClass: 'border-l-slate-500', desc: '號稱「新手殺手」的複雜地下網絡。高濃度魔素(人流)匯集成河，容易迷失方向。', spots: [
-                            { name: '阪急三番街', desc: 'Kiddy Land 玩具巢穴', map: 'https://www.google.com/maps/search/?api=1&query=Hankyu+Sanbangai' },
-                            { name: 'UMEDA FOOD HALL', desc: '地下補給大廳', map: 'https://www.google.com/maps/search/?api=1&query=UMEDA+FOOD+HALL' },
-                            { name: 'DIAMOR OSAKA', desc: '大理石迴廊', map: 'https://www.google.com/maps/search/?api=1&query=Diamor+Osaka' },
-                            { name: 'Whity 梅田', desc: '白之地下道', map: 'https://www.google.com/maps/search/?api=1&query=Whity+Umeda' }
+                        { id: 'layer5', name: '第五層：地下街', title: '梅田地下迷宮', rpgTitle: '【黑暗精靈領地‧顛倒世界】', colorClass: 'border-l-slate-500', desc: '號稱「新手殺手」的複雜地下網絡。高濃度魔素(人流)匯集成河，容易迷失方向。', spots: [
+                                { name: '阪急三番街', desc: 'Kiddy Land 玩具巢穴', map: 'https://www.google.com/maps/search/?api=1&query=Hankyu+Sanbangai' },
+                                { name: 'UMEDA FOOD HALL', desc: '地下補給大廳', map: 'https://www.google.com/maps/search/?api=1&query=UMEDA+FOOD+HALL' },
+                                { name: 'DIAMOR OSAKA', desc: '大理石迴廊', map: 'https://www.google.com/maps/search/?api=1&query=Diamor+Osaka' },
+                                { name: 'Whity 梅田', desc: '白之地下道', map: 'https://www.google.com/maps/search/?api=1&query=Whity+Umeda' }
                         ]},
-                        { id: 'layer6', name: '第六層：天王寺', title: '天王寺・阿倍野', rpgTitle: '【神界】', colorClass: 'border-l-yellow-500', desc: '擁有全日本最高的結界塔，是距離天空最近的區域，同時保留著昭和時代的混沌感。', spots: [
-                            { name: '天王寺動物園', desc: '神獸以此為家', map: 'https://www.google.com/maps/search/?api=1&query=Tennoji+Zoo' },
-                            { name: '通天閣', desc: '舊時代的神之塔', map: 'https://www.google.com/maps/search/?api=1&query=Tsutenkaku' },
-                            { name: '阿倍野 HARUKAS 300', desc: '天空迴廊 (絕景展望台)', map: 'https://www.google.com/maps/search/?api=1&query=Abeno+Harukas+300' },
-                            { name: '新世界本通商店街', desc: '下町神界 (串炸聖地)', map: 'https://www.google.com/maps/search/?api=1&query=Shinsekai+Hondori' }
+                        { id: 'layer6', name: '第六層：天王寺', title: '天王寺‧阿倍野', rpgTitle: '【神界】', colorClass: 'border-l-yellow-500', desc: '擁有全日本最高的結界塔，是距離天空最近的區域，同時保留著昭和時代的混沌感。', spots: [
+                                { name: '天王寺動物園', desc: '神獸以此為家', map: 'https://www.google.com/maps/search/?api=1&query=Tennoji+Zoo' },
+                                { name: '通天閣', desc: '舊時代的神之塔', map: 'https://www.google.com/maps/search/?api=1&query=Tsutenkaku' },
+                                { name: '阿倍野 HARUKAS 300', desc: '天空迴廊 (絕景展望台)', map: 'https://www.google.com/maps/search/?api=1&query=Abeno+Harukas+300' },
+                                { name: '新世界本通商店街', desc: '下町神界 (串炸聖地)', map: 'https://www.google.com/maps/search/?api=1&query=Shinsekai+Hondori' }
                         ]},
                         { id: 'special', name: '特殊點', title: '隱藏支線', rpgTitle: '【特殊能力獲取點】', colorClass: 'border-l-pink-500', desc: '散落在迷宮各處的特殊祭壇與工坊，可獲得強力 Buff。', spots: [
-                            { name: '難波八阪神社', desc: '巨大獅頭神殿：釋放強烈「厄除吼叫」，驅散霉運。', map: 'https://www.google.com/maps/search/?api=1&query=Namba+Yasaka+Shrine' },
-                            { name: '法善寺', desc: '水掛不動明王：長滿青苔的尊者，給予「心願成就」加護。', map: 'https://www.google.com/maps/search/?api=1&query=Hozenji+Temple' },
-                            { name: '四天王寺', desc: '古代聖域：強大的魔力回復點，適合淨化身心。', map: 'https://www.google.com/maps/search/?api=1&query=Shitennoji' },
-                            { name: '千日前道具街', desc: '矮人鐵匠街：販售各種廚具神器的工坊聚落。', map: 'https://www.google.com/maps/search/?api=1&query=Sennichimae+Doguyasuji' }
+                                { name: '難波八阪神社', desc: '巨大獅頭神殿：釋放強烈「厄除吼叫」，驅散霉運。', map: 'https://www.google.com/maps/search/?api=1&query=Namba+Yasaka+Shrine' },
+                                { name: '法善寺', desc: '水掛不動明王：長滿青苔的尊者，給予「心願成就」加護。', map: 'https://www.google.com/maps/search/?api=1&query=Hozenji+Temple' },
+                                { name: '四天王寺', desc: '古代聖域：強大的魔力回復點，適合淨化身心。', map: 'https://www.google.com/maps/search/?api=1&query=Shitennoji' },
+                                { name: '千日前道具街', desc: '矮人鐵匠街：販售各種廚具神器的工坊聚落。', map: 'https://www.google.com/maps/search/?api=1&query=Sennichimae+Doguyasuji' }
                         ]}
                     ],
                     kyoto: [
                         {
-                            id: 'layer1', name: '第一層：礦脈', title: '礦脈 (Mineral Vein)', rpgTitle: '【妖都之心・經濟魔力引擎】', colorClass: 'border-l-indigo-500',
+                            id: 'layer1', name: '第一層：礦脈', title: '礦脈 (Mineral Vein)', rpgTitle: '【妖都之心‧經濟魔力引擎】', colorClass: 'border-l-indigo-500',
                             intro: [
-                                { title: '區域情報：妖都的心臟', desc: '這裡是京都靈脈最粗大的主脈線，表面上是購物天堂，實際上是妖族吸取人類「經濟魔力」的巨大引擎。規矩只有一條：「付出金錢，就能獲得慾望的滿足」。' },
-                                { title: '1. 京都車站 (妖族入境管理局)', desc: '巨大的靈力掃描網。大階梯是數據散熱片，京都塔是全域監視眼。' },
-                                { title: '2. 四條河原町 (慾望十字路)', desc: '狐妖經營的百貨商圈，商品常附帶魅惑魔法。鴨川是天然結界，岸邊情侶可能有非人存在。' },
-                                { title: '3. 新京極商店街 (時空縫隙)', desc: '付喪神與狸貓聚集的古老遊樂場，時間流速與外界不同，夾雜的神社是鎮壓靈脈的安全閥。' },
-                                { title: '4. 錦市場 (煉金廚房)', desc: '妖族藥劑師與人類廚師切磋之地。彩色天頂是人造白晝結界。特色小吃如玉子燒、豆乳甜甜圈皆可恢復 HP。' }
+                                { title: '區域情報：『京都市中心』妖都的心臟', desc: '此處是妖族開鑿的靈脈主幹，雖偽裝成交通樞紐，卻暗中記錄著訪客氣息。 作為條約下的『絕對緩衝區』，這條購物天堂實則是妖族吞噬財富的引擎。 鐵律僅一條：『只要付出金錢，就能買下你的慾望。」' },
+                                { title: '1. 京都車站 (妖族入境管理局)', desc: '靈力掃描網啟動。全域監視眼—京都塔：矗立在車站前的紅白巨塔，並非單純的地標，而是妖族監控全城的「主靈脈增幅器」。大階梯則是光影交錯的催眠陣列。它將靈力偽裝成絢爛燈秀，無聲滲透視網膜，蠱惑人們解開理智枷鎖，瘋狂獻祭加隆。' },
+                                { title: '2. 四條河原町 (慾望十字路)', desc: '幻術交易所：狐妖掌管的百貨迷宮。 她們以時尚編織牢籠，精品即是實體幻術。 限定商品皆附帶『強制魅惑』詛咒，目光接觸瞬間，便誘使人類獻祭所有。' },
+                                { title: '3. 新京極商店街 (時空縫隙)', desc: '付喪神與狸貓聚集的古老遊樂場，這裡混雜了電影、古物與電子訊號，時間流速與外界截然不同——若沈溺於此處的歡愉，將永遠找不到回家的路。' },
+                                { title: '4. 錦市場 (煉金廚房)', desc: '妖族藥劑師與人類廚師切磋之地。彩色天頂是人造白晝結界。特色小吃如玉子燒、豆乳甜甜圈皆可恢復 HP。' },
+                                { title: '5. 鴨川 (深層界河)', desc: '穿過商圈的河流是天然結界。在河邊散步時請注意，坐在岸邊的情侶，有三成機率其中一方並非人類，他們正在進行跨種族的約會。' },
+                                { title: '6. 錦天滿宮 (鎮壓之樁)', desc: '這些並非普通的信仰場所，而是為了鎖住狂暴靈脈而設的「封印釘」。它們充當安全閥，將妖氣限制在人類可承受的閾值之內。' }
                             ],
                             spots: [
-                                { name: '京都高島屋', rpgName: '財祿狐商會總部', desc: '館內暗藏「財祿流」，玩家可獲得金運符。', map: 'https://www.google.com/maps/search/?api=1&query=京都高島屋', bonus: '金運提升' },
+                                { name: '京都高島屋', rpgName: '財祿狐商會總部', desc: '位於四條十字能量點，是狐族經營的人類合作商會核心。\n館內暗藏「財祿流」，能巧妙地調整旅人的購物運勢。，玩家可獲得金運符。', map: 'https://www.google.com/maps/search/?api=1&query=京都高島屋', bonus: '金運提升' },
                                 { name: '京都大丸', rpgName: '衣紋妖的織氣塔', desc: '纖維靈感應旅人情緒，被選中的服飾會格外亮眼。', map: 'https://www.google.com/maps/search/?api=1&query=大丸京都店', bonus: '魅力增益' },
-                                { name: '唐吉軻德', rpgName: '混沌迷宮市集', desc: '混沌妖族聚集，通道會微妙改變，引導旅人找到剛好需要的物品。', map: 'https://www.google.com/maps/search/?api=1&query=唐吉軻德京都', bonus: '隨機道具' },
+                                { name: '唐吉軻德', rpgName: '盤踞在商會底下的混沌市集', desc: '混沌妖族聚集，通道會微妙改變，引導旅人找到剛好需要的物品。', map: 'https://www.google.com/maps/search/?api=1&query=唐吉軻德京都', bonus: '隨機道具' },
                                 { name: 'Kiddy Land', rpgName: '夢境族的玩偶棲所', desc: '由夢靈維護，玩偶帶有微弱生命感。', map: 'https://www.google.com/maps/search/?api=1&query=Kiddy+Land+Kyoto', bonus: '心靈療癒' },
                                 { name: 'BAL', rpgName: '書靈靈感基地', desc: '承載強大思緒流，是精神調律的最佳地點。', map: 'https://www.google.com/maps/search/?api=1&query=京都BAL', bonus: '靈感碎片' },
                                 { name: '京都 LOFT', rpgName: '付喪神多層棲地', desc: '住著年輕付喪神，小物會主動吸引旅人視線。', map: 'https://www.google.com/maps/search/?api=1&query=京都LOFT', bonus: '生活道具' },
@@ -616,7 +1011,7 @@
                             ]
                         },
                         {
-                            id: 'layer2', name: '第二層：靈脈', title: '靈脈 (Spiritual Vein)', rpgTitle: '【古老結界・神靈棲息地】', colorClass: 'border-l-red-500',
+                            id: 'layer2', name: '第二層：靈脈', title: '靈脈 (Spiritual Vein)', rpgTitle: '【古老結界‧神靈棲息地】', colorClass: 'border-l-red-500',
                             desc: '遠離塵囂的古老力量源頭，是與神靈締結契約的場所。',
                             spots: [
                                 { name: '貴船神社', rpgName: '水龍與契約之社', desc: '水氣最濃之處，水占籤被視為最誠實的占兆。', map: 'https://www.google.com/maps/search/?api=1&query=貴船神社', bonus: '契約儀式' },
@@ -632,101 +1027,33 @@
                         }
                     ]
                 };
-
                 const currentLayerData = computed(() => guildData.labyrinth.find(l => l.id === selectedLayer.value));
                 const currentKyotoData = computed(() => guildData.kyoto.find(l => l.id === selectedKyotoLayer.value));
-
-                // 補給分頁：迷宮飯 / 靈脈礦石
-                const supplySubTab = ref('osaka');
+                
+                // Supply Data
                 const supplyTabs = [
                     { id: 'osaka', label: '迷宮飯◆大阪', icon: 'fa-solid fa-bowl-rice' },
                     { id: 'kyoto', label: '靈脈礦石◇京都', icon: 'fa-solid fa-gem' }
                 ];
-
                 const supplyData = {
                     osaka: [
-                        {
-                            name: '難波站前‧勇者補給便當',
-                            type: '主食便當',
-                            price: '¥850',
-                            place: '南海難波站周邊便當店',
-                            rarity: '常見 · 一般補給',
-                            note: '體力上限 +20，暖身效果小幅提升',
-                            desc: '白飯搭配唐揚雞、玉子燒與醬菜的標準勇者補給組合。\n適合剛從關西海上要塞空港轉移到大阪、還在適應節奏時作為第一餐。'
-                        },
-                        {
-                            name: '道頓堀‧章魚燒能量球',
-                            type: '街邊小吃',
-                            price: '¥600～',
-                            place: '道頓堀商圈沿河攤販',
-                            rarity: '人氣 · 迷宮定番',
-                            note: '心情值 +30，拍照加成 +10',
-                            desc: '外酥內軟的章魚燒一口下去，搭配醬汁與柴魚片，瞬間回覆精神力。\n非常適合邊走邊吃，當作探索心齋橋與道頓堀時的機動補給品。'
-                        },
-                        {
-                            name: '日本橋‧深夜拉麵治癒碗',
-                            type: '熱食補給',
-                            price: '¥900～',
-                            place: '日本橋拉麵店 / 巷弄名店',
-                            rarity: '稀有 · 夜間限定',
-                            note: '疲勞 -25，溫暖度 +30',
-                            desc: '濃郁湯頭配上叉燒與半熟蛋的深夜拉麵，是清空一日迷宮疲勞的最佳儀式。\n建議在回京都前享用，可讓回程的魔導列車變成昏昏欲睡的療癒時段。'
-                        },
-                        {
-                            name: '梅田‧車站地下咖啡晨光套餐',
-                            type: '早餐組合',
-                            price: '¥650～',
-                            place: '梅田地下街咖啡館',
-                            rarity: '實用 · 早鳥補給',
-                            note: '專注 +15，行動速度 +10%',
-                            desc: '厚片吐司、沙拉與熱咖啡的簡單組合，卻是開始長程探索前最安定的起點。\n特別適合當作「前往姬路城」或「城市長距離移動」前的輕盈補給。'
-                        }
+                        { name: '難波站前‧勇者補給便當', type: '主食便當', price: '¥850', place: '南海難波站周邊便當店', rarity: '常見 · 一般補給', note: '體力上限 +20，暖身效果小幅提升', desc: '白飯搭配唐揚雞、玉子燒與醬菜的標準勇者補給組合。\n適合剛從關西海上要塞空港轉移到大阪、還在適應節奏時作為第一餐。' },
+                        { name: '道頓堀‧章魚燒能量球', type: '街邊小吃', price: '¥600～', place: '道頓堀商圈沿河攤販', rarity: '人氣 · 迷宮定番', note: '心情值 +30，拍照加成 +10', desc: '外酥內軟的章魚燒一口下去，搭配醬汁與柴魚片，瞬間回覆精神力。\n非常適合邊走邊吃，當作探索心齋橋與道頓堀時的機動補給品。' },
+                        { name: '日本橋‧深夜拉麵治癒碗', type: '熱食補給', price: '¥900～', place: '日本橋拉麵店 / 巷弄名店', rarity: '稀有 · 夜間限定', note: '疲勞 -25，溫暖度 +30', desc: '濃郁湯頭配上叉燒與半熟蛋的深夜拉麵，是清空一日迷宮疲勞的最佳儀式。\n建議在回京都前享用，可讓回程的魔導列車變成昏昏欲睡的療癒時段。' },
+                        { name: '梅田‧車站地下咖啡晨光套餐', type: '早餐組合', price: '¥650～', place: '梅田地下街咖啡館', rarity: '實用 · 早鳥補給', note: '專注 +15，行動速度 +10%', desc: '厚片吐司、沙拉與熱咖啡的簡單組合，卻是開始長程探索前最安定的起點。\n特別適合當作「前往姬路城」或「城市長距離移動」前的輕盈補給。' }
                     ],
                     kyoto: [
-                        {
-                            name: '四條‧靈脈共鳴水晶',
-                            type: '礦石素材',
-                            price: '¥1200～',
-                            place: '河原町周邊神秘雜貨店',
-                            rarity: '稀有 · 靈脈共鳴',
-                            note: '裝備插槽可鑲嵌一次，提升旅途安定度',
-                            desc: '微微發光的透明水晶，據說能同步佩戴者與京都靈脈的呼吸節奏。\n適合掛在隨身包或相機包上，象徵本次旅程的「守護核心」。'
-                        },
-                        {
-                            name: '新京極‧付喪神碎片石',
-                            type: '靈性素材',
-                            price: '¥800～',
-                            place: '新京極小巷內古道具店',
-                            rarity: '隱藏 · 緣分限定',
-                            note: '觀察力 +10，靈感觸發機率上升',
-                            desc: '外觀不起眼的小石頭，卻總讓人忍不住多看兩眼。\n據說是長年陪伴人類的器物，在覺醒成付喪神前殘留下來的碎片。'
-                        },
-                        {
-                            name: '京都塔‧夜光記錄晶核',
-                            type: '記憶媒介',
-                            price: '¥1500～',
-                            place: '京都塔周邊紀念品店',
-                            rarity: '高階 · 記憶封存',
-                            note: '回國後查看，會喚起本次旅程的片段畫面',
-                            desc: '外型像透明寶珠的水晶，內部會在黑暗中微微發光。\n非常適合當作「京都篇章完結」的象徵道具。'
-                        },
-                        {
-                            name: '貴船‧水紋青藍礦',
-                            type: '水屬性礦石',
-                            price: '¥1000～',
-                            place: '貴船神社周邊小店',
-                            rarity: '地域限定 · 水屬靈礦',
-                            note: '心情穩定度 +20，旅行焦躁感 -10',
-                            desc: '表面有如水波紋理的青藍色礦石，放在掌心會有微涼感。\n適合當作焦躁時握著的小物，幫助自己慢慢沉澱。'
-                        }
+                        { name: '四條‧靈脈共鳴水晶', type: '礦石素材', price: '¥1200～', place: '河原町周邊神秘雜貨店', rarity: '稀有 · 靈脈共鳴', note: '裝備插槽可鑲嵌一次，提升旅途安定度', desc: '微微發光的透明水晶，據說能同步佩戴者與京都靈脈的呼吸節奏。\n適合掛在隨身包或相機包上，象徵本次旅程的「守護核心」。' },
+                        { name: '新京極‧付喪神碎片石', type: '靈性素材', price: '¥800～', place: '新京極小巷內古道具店', rarity: '隱藏 · 緣分限定', note: '觀察力 +10，靈感觸發機率上升', desc: '外觀不起眼的小石頭，卻總讓人忍不住多看兩眼。\n據說是長年陪伴人類的器物，在覺醒成付喪神前殘留下來的碎片。' },
+                        { name: '京都塔‧夜光記錄晶核', type: '記憶媒介', price: '¥1500～', place: '京都塔周邊紀念品店', rarity: '高階 · 記憶封存', note: '回國後查看，會喚起本次旅程的片段畫面', desc: '外型像透明寶珠的水晶，內部會在黑暗中微微發光。\n非常適合當作「京都篇章完結」的象徵道具。' },
+                        { name: '貴船‧水紋青藍礦', type: '水屬性礦石', price: '¥1000～', place: '貴船神社周邊小店', rarity: '地域限定 · 水屬靈礦', note: '心情穩定度 +20，旅行焦躁感 -10', desc: '表面有如水波紋理的青藍色礦石，放在掌心會有微涼感。\n適合當作焦躁時握著的小物，幫助自己慢慢沉澱。' }
                     ]
                 };
-
                 const currentSupplyList = computed(() => supplyData[supplySubTab.value] || []);
 
+                // Itinerary Data
                 const itineraryData = ref({
-                  
-                    '2025-12-14': [
+                     '2025-12-14': [
                         { id: 1401, time: '05:45', title: '黎明前的集結：桃園空港前哨站', desc: '【任務起點：前哨站集結】天色尚未轉亮，桃園空港前哨站仍帶著夜色的餘溫。遠征隊成員揹著行囊陸續現身，在冷空氣與霧氣中回報到齊。這裡，是從日常世界跨入異境冒險的第一道轉移門檻。隊伍在此確認通行證、入境許可術式、行李裝備與夥伴狀態，完成後，精神值 +100，隊伍穩定度 +100。\n\n⚠️ 備註：建議提早抵達，預留托運儀式與安檢咒陣的時間，以免錯過飛空艇召喚時刻。', type: 'transport' },
                         { id: 1402, time: '07:25', title: '登機門前的召喚陣待命', desc: '【前線待機任務：飛艇召喚陣】遠征隊在登機門前集合，在龍鱗飛艇的召喚陣等待。隊員們一邊檢查裝備欄位與座位分配，一邊調整背包與披風，準備踏上通往關西的空中航路。所有人確認無誤後進入「待命」狀態，行前緊張度 +30，專注度 -10。\n\n⚠️ 備註：隨時注意登機門魔法陣是否變更，請保持魔導通訊石訊息暢通，以免錯過登機法陣。', type: 'transport' },
                         { id: 1403, time: '08:05', title: '穿越雲海的飛行篇章', desc: '【旅途章：雲上海面的魔導航路】龍鱗飛艇自桃園起飛，開啟魔導石引擎，穿越雲海與時間閃電的縫隙，朝關西海上要塞空港前進。此刻的機艙，是遠征開始前短暫安穩的結界。有人閉目養神，有人翻閱旅程卷軸規劃支線，有人單純望向雲海放空思緒。體力與精神在此緩緩回復，體力回復 +15，心情穩定度 +10。緊張度-15\n\n⚠️ 備註：可利用這段時間補眠或進行心靈冥想，為接下來的異國冒險儲備能量。', type: 'transport' },
@@ -737,7 +1064,7 @@
                         { id: 1408, time: '20:30', title: '轉進京都據點：與隊友再次合流', desc: '【據點轉移：從霓虹到古都】結束大阪迷宮前哨探索後，遠征隊啟程往京都移動，在預定的隱者之灯據點重整隊伍。列車與街景從霓虹閃爍的迷宮風格，逐漸轉為沉穩安靜的古都氛圍，彷彿世界色調被悄悄調暗一階。此處為新主基地啟用點，隊伍在此恢復體力並調整隔日戰術規劃。\n\n⚠️ 備註：抵達後請先確認房間分配、室友組合與隔日集合時間，避免早晨啟程時發生脫隊事件。', type: 'hotel' },
                         { id: 1409, time: '22:00', title: '宵夜補給戰：超商、超市與唐吉軻德', desc: '【補給任務：夜間物資掃蕩】夜晚的京都仍有數處補給據點亮著燈光。遠征隊展開夜間補給戰：前往數字道具屋、羅森道具屋、生命超市與24HR唐吉軻德公會，掃貨零食、飲料與各種旅途小物。行囊重量 +15，但內心滿足度 +50，未來幾日的宵夜儀式與房內小聚因此有了堅實後盾。\n\n⚠️ 備註：請留意退稅門檻與當天購物時限，避免錯過魔法折扣與退稅結界法陣關閉時間。', type: 'food' },
                         { id: 1410, time: '00:00', title: '第一夜終章：進入睡眠結界', desc: '【休息章：睡眠結界啟動】完成一整天的轉移與探索後，遠征隊各自回到房內，整理當日戰利品與裝備欄位，在柔軟被窩與暖氣構成的睡眠結界中進入恢復模式。HP條、MP條與社交能量緩緩回滿，為明日的長程包車戰與新一輪冒險做好準備。\n\n⚠️ 備註：確認晨喚符與隔日集合時間，並替魔導通訊石、留影水晶、魔力儲藏塊完成充電，避免明日失聯或時間判定失誤。', type: 'hotel' },
-    ],
+                    ],
                     '2025-12-15': [
                         { id: 1501, time: '08:00', title: '啟程．離開京都靈脈結界陣', desc: '【主線任務啟動：遠征馬車】清晨，遠征隊在隱者之灯大廳集合，登上專屬馬車。車輪滑過古都街道的石板路緩緩駛離城市，一路向關西平原與白鷺城前進。這是今日主線任務的開場：離開安全據點、踏上外地城池。\n\n⚠️ 備註：出發前請再次確認通行證、魔導通訊石、雨具與保暖衣物，避免在遠征途中因天候變化受到減益效果。', type: 'transport' },
                         { id: 1502, time: '09:50', title: '姬路城探索．白鷺之城的記憶', desc: '【城郭探索任務：白鷺之城】遠征隊抵達姬路城，踏入猶如白鷺振翅般的城郭。白牆與瓦頂之間，藏著武士世代的記憶與無數歷史事件的觸發點。每一層樓梯、每一個箭孔，都像是過去戰役留下的技能欄位與防禦機制。隊伍在此獲得「歷史理解＋城郭感知」被動 Buff。\n\n⚠️ 備註：建議穿著好走的鞋子，城內階梯較多，長時間行走請注意膝蓋與腳踝耐久度。', type: 'sightseeing' },
@@ -755,7 +1082,7 @@
                         { id: 1606, time: '14:30', title: '二條城．沉睡將軍的歷史舞台', desc: '【歷史副本：將軍居所】進入二條城，腳步踩在會發出鶯聲的木地板上，彷彿聽見古代武士與將軍在廊道上穿梭的回音。壁畫、庭園與建築結構共同編織出一幅權力、審美與時代交錯的畫卷。遠征隊在此獲得「歷史理解 +50」、「空間感知 +20」的被動加成。\n\n⚠️ 備註：室內請留意參觀動線與現場規定，避免觸發工作人員提醒事件。', type: 'sightseeing' },
                         { id: 1607, time: '16:30', title: '高木批發超市三条店．零食風暴支線任務', desc: '【支線任務：補給倉庫突襲】傍晚來到高木批發超市三条店，這裡被傳為「零食與泡麵的寶庫」。走進店內，貨架宛如一排排等待被探索的寶箱，價格親切，是補充宵夜與伴手禮的黃金據點。成功掃貨後，隊伍「宵夜庫存量 +10000」、「旅途口糧安全感 +5000」。\n\n⚠️ 備註：記得開啟下方傳送門導航，避免在巷弄迷宮中迷路。', type: 'shop', link: 'https://maps.app.goo.gl/QiqSBbP7DtEsyLQV8?g_st=ic', linkText: '開啟導航' },
                         { id: 1608, time: '18:30', title: '歸返隱者之灯．滿載物資', desc: '【物資回收：據點再補滿】結束高木倉庫的掃貨任務後，馬車載著裝滿零食與補給品返回隱者之灯。雖然行李重量再度上升，但心情值與未來幾晚的滿足感也隨之提升。', type: 'transport' },
-                        { id: 1609, time: '19:00', title: '自由夜行．在京都的街巷中徘徊', desc: '【夜間自由支線：各自探索】夜色覆上京都後，妖族與人類共存的現代都市真正甦醒。遠征隊進入「夜間自由支線時段」，城市的靈脈在此刻最為鮮明。\n\n有人步入京都高島屋——財祿狐商會總部，感受狐族巧妙地操控的「財祿流」，有旅人在此被選中、獲得提升購運的金運符；有人誤闖大丸・衣紋妖的織氣塔，在纖維靈的注視下挑選服飾，衣物彷彿自己找到主人。\n更勇敢的探索者踏入唐吉軻德公會內的混沌市集，通道如迷宮般變換，引導旅人邂逅「剛好需要」的道具；也有人朝 Kiddy Land 夢境玩偶棲所前進，被夢靈選中的玩偶往往能帶來強化心情的 buff。\n若想平靜，隊員們會走向 BAL 靈感基地，在書靈的思念流中獲得靈感碎片；或漫步至 京都 LOFT，付喪神的多層棲地，與主動呼喚旅人的小物邂逅，開啟羈絆事件。\n\n也有冒險者選擇回到據點，在安全結界中拆零食、整理戰利品，讓今日的故事沉入心底。\n在妖都京都的夜裡，每個選擇，都會悄悄寫入今晚的個人傳說。', type: 'food' },
+                        { id: 1609, time: '19:00', title: '自由夜行．在京都的街巷中徘徊', desc: '【夜間自由支線：各自探索】夜色覆上京都後，妖族與人類共存的現代都市真正甦醒。遠征隊進入「夜間自由支線時段」，城市的靈脈在此刻最為鮮明。\n\n有人步入京都高島屋——財祿狐商會總部，感受狐族巧妙地操控的「財祿流」，有旅人在此被選中、獲得提升購運的金運符；有人誤闖大丸‧衣紋妖的織氣塔，在纖維靈的注視下挑選服飾，衣物彷彿自己找到主人。\n更勇敢的探索者踏入唐吉軻德公會內的混沌市集，通道如迷宮般變換，引導旅人邂逅「剛好需要」的道具；也有人朝 Kiddy Land 夢境玩偶棲所前進，被夢靈選中的玩偶往往能帶來強化心情的 buff。\n若想平靜，隊員們會走向 BAL 靈感基地，在書靈的思念流中獲得靈感碎片；或漫步至 京都 LOFT，付喪神的多層棲地，與主動呼喚旅人的小物邂逅，開啟羈絆事件。\n\n也有冒險者選擇回到據點，在安全結界中拆零食、整理戰利品，讓今日的故事沉入心底。\n在妖都京都的夜裡，每個選擇，都會悄悄寫入今晚的個人傳說。', type: 'food' },
                         { id: 1610, time: '00:00', title: '第三夜．靈脈巡禮的冒險旅程暫時告一段落', desc: '【休息章：靈脈巡禮後的沈澱】經過一整天的神社與靈脈巡禮，身心都需要好好沈澱。遠征隊在各自房間的睡眠結界中安靜躺下，讓今天吸收的風景、故事與祈願慢慢沉入心底。體力條、魔力條再度回滿，為接下來的任天堂回憶神殿與宇治之行預做準備。', type: 'hotel' },
                     ],
                     '2025-12-17': [
@@ -789,29 +1116,87 @@
                         { id: 2008, time: '18:20', title: '歸鄉之翼．從關西返航桃園', desc: '【最終章：回到原點的存檔】\n18:20 開始登上歸鄉之翼，19:00 自關西海上要塞空港起航。鐵翼穿越夜空，朝桃園前哨站前進。約 21:15 著陸——當機輪觸地的瞬間，本次「騎士團討伐魔王遠征」正式存檔完成。\n\n旅程在地圖上結束，但冒險者心中的劇本，正準備迎接下一章。', type: 'transport' }
                     ]
                 });
+                
+                // Coins / Ledger Data
+                const coinTabs = [
+                    { id: 'ledger', label: '記帳', icon: 'fa-solid fa-book-open' },
+                    { id: 'stats', label: '分析', icon: 'fa-solid fa-chart-pie' },
+                    { id: 'settings', label: '匯率', icon: 'fa-solid fa-sliders' },
+                ];
+                const chapters = [
+                    { id: 'ch1', label: '第一章', dateShort: '12/14', fullTitle: '12/14 第一章：異界之門' },
+                    { id: 'ch2', label: '第二章', dateShort: '12/15', fullTitle: '12/15 第二章：白鷺與達摩' },
+                    { id: 'ch3', label: '第三章', dateShort: '12/16', fullTitle: '12/16 第三章：靈山與神靈' },
+                    { id: 'ch4', label: '第四章', dateShort: '12/17', fullTitle: '12/17 第四章：騎士們的休日' },
+                    { id: 'ch5', label: '第五章', dateShort: '12/18', fullTitle: '12/18 第五章：神殿與鳳凰' },
+                    { id: 'ch6', label: '第六章', dateShort: '12/19', fullTitle: '12/19 第六章：最終饗宴' },
+                    { id: 'ch7', label: '終章', dateShort: '12/20', fullTitle: '12/20 終章：回憶與寶藏' },
+                ];
+                const expenseCategories = [
+                    { val: 'potion', label: '道具屋(藥瓶)', icon: 'fa-solid fa-flask', color: '#34d399' },
+                    { val: 'food', label: '魔法料理(雞腿)', icon: 'fa-solid fa-drumstick-bite', color: '#fb923c' },
+                    { val: 'transport', label: '移動法陣', icon: 'fa-solid fa-circle-notch', color: '#60a5fa' },
+                    { val: 'gear', label: '裝備護具(盾)', icon: 'fa-solid fa-shield-halved', color: '#9ca3af' },
+                    { val: 'drugstore', label: '煉金藥水(面具)', icon: 'fa-solid fa-mask', color: '#10b981' },
+                    { val: 'ticket', label: '結界通行證', icon: 'fa-solid fa-ticket', color: '#f87171' },
+                    { val: 'gacha', label: '隨機寶箱(扭蛋)', icon: 'fa-solid fa-dice-d20', color: '#facc15' },
+                    { val: 'gift', label: '羈絆道具(禮物)', icon: 'fa-solid fa-gift', color: '#f472b6' },
+                    { val: 'quest', label: '支線任務(卷軸)', icon: 'fa-solid fa-scroll', color: '#94a3b8' },
+                    { val: 'hotel', label: '隱者之灯(小屋)', icon: 'fa-solid fa-tent', color: '#818cf8' },
+                ];
+                const expenses = ref([
+                    // 12/14
+                    { id: 1, chapterId: 'ch1', type: 'quest', title: '行李特工', yen: 2624, twd: 538, payment: 'cash', note: '' },
+                    { id: 2, chapterId: 'ch1', type: 'hotel', title: 'FORZA KYOTO飯店', yen: 35005, twd: 7176, payment: 'cash', note: '' },
+                    { id: 3, chapterId: 'ch1', type: 'quest', title: '公積金', yen: 30000, twd: 6150, payment: 'cash', note: '' },
+                    // 12/15
+                    { id: 4, chapterId: 'ch2', type: 'transport', title: '包車', yen: 8500, twd: 1743, payment: 'cash', note: '' },
+                    // 12/16
+                    { id: 5, chapterId: 'ch3', type: 'transport', title: '包車', yen: 7500, twd: 1538, payment: 'cash', note: '' },
+                    // 12/18
+                    { id: 6, chapterId: 'ch5', type: 'ticket', title: '任天堂博物館門票', yen: 3390, twd: 695, payment: 'cash', note: '' },
+                    // 12/19
+                    { id: 7, chapterId: 'ch6', type: 'food', title: '鳥貴族吃到飽', yen: 2800, twd: 574, payment: 'cash', note: '' },
+                    // 12/20
+                    { id: 8, chapterId: 'ch7', type: 'transport', title: '包車', yen: 3500, twd: 718, payment: 'cash', note: '' },
+                ]);
 
+                // --- Computed & Methods (Journal) ---
                 const currentEvents = computed(() => itineraryData.value[selectedDate.value] || []);
                 const selectDay = (date) => { selectedDate.value = date; nextTick(() => initSortable()); };
                 const getChapterTitle = (date) => days.find(d => d.date === date)?.chapter || '';
                 const getChapterSubtitle = (date) => days.find(d => d.date === date)?.subtitle || '';
                 const getCategoryColor = (type) => ({ sightseeing: 'border-l-purple-400', transport: 'border-l-blue-400', food: 'border-l-orange-400', shop: 'border-l-yellow-400', hotel: 'border-l-indigo-400', ticket: 'border-l-red-400' }[type] || 'border-l-white');
                 const getCategoryIcon = (type) => eventTypes.find(t => t.val === type)?.icon || 'fa-solid fa-circle';
-
+                
                 let sortableInstance = null;
                 const initSortable = () => {
+                    const list = itineraryData.value[selectedDate.value];
+                    if (!list || list.length === 0) {
+                        if (sortableInstance) { sortableInstance.destroy(); sortableInstance = null; }
+                        return;
+                    }
                     const el = document.getElementById('itinerary-list');
                     if (!el) return;
-                    if (sortableInstance) sortableInstance.destroy();
+                    if (sortableInstance) { sortableInstance.destroy(); sortableInstance = null; }
                     sortableInstance = new Sortable(el, {
                         animation: 200, delay: 200, delayOnTouchOnly: true, ghostClass: 'sortable-ghost', dragClass: 'sortable-drag',
-                        onEnd: function (evt) {
-                            const item = itineraryData.value[selectedDate.value].splice(evt.oldIndex, 1)[0];
-                            itineraryData.value[selectedDate.value].splice(evt.newIndex, 0, item);
+                        onEnd(evt) {
+                            const arr = itineraryData.value[selectedDate.value];
+                            if (!arr) return;
+                            const oldIndex = evt.oldIndex; const newIndex = evt.newIndex;
+                            if (oldIndex == null || newIndex == null || oldIndex === newIndex) return;
+                            const [moved] = arr.splice(oldIndex, 1);
+                            arr.splice(newIndex, 0, moved);
                         },
                     });
                 };
-
-                const openAddModal = () => { modalMode.value = 'add'; editingEvent.value = { id: Date.now(), time: '', title: '', desc: '', type: 'sightseeing', link: '' }; confirmDelete.value = false; isModalOpen.value = true; };
+                const openAddModal = () => {
+                    modalMode.value = 'add';
+                    editingEvent.value = { id: Date.now(), time: '', title: '', desc: '', type: 'sightseeing', link: '', linkText: '' };
+                    confirmDelete.value = false;
+                    isModalOpen.value = true;
+                };
                 const editEvent = (event) => { modalMode.value = 'edit'; editingEvent.value = { ...event }; confirmDelete.value = false; isModalOpen.value = true; };
                 const closeModal = () => isModalOpen.value = false;
                 const saveEvent = () => {
@@ -825,6 +1210,7 @@
                         if (index !== -1) list[index] = { ...editingEvent.value };
                     }
                     closeModal();
+                    nextTick(() => initSortable());
                 };
                 const handleDelete = () => {
                     if (!confirmDelete.value) { confirmDelete.value = true; return; }
@@ -832,26 +1218,158 @@
                     const index = list.findIndex(e => e.id === editingEvent.value.id);
                     if (index !== -1) list.splice(index, 1);
                     closeModal();
+                    nextTick(() => initSortable());
                 };
+
+                // --- Computed & Methods (Coins) ---
+                const currentChapterExpenses = computed(() => expenses.value.filter(e => e.chapterId === selectedChapter.value));
+                const currentChapterInfo = computed(() => chapters.find(c => c.id === selectedChapter.value) || {});
+                const todayTotalYen = computed(() => currentChapterExpenses.value.reduce((sum, e) => sum + e.yen, 0));
+                const todayTotalTWD = computed(() => Math.round(todayTotalYen.value * exchangeRate.value));
+                const grandTotalTWD = computed(() => Math.round(expenses.value.reduce((sum, e) => sum + e.yen, 0) * exchangeRate.value));
+                const calculatedTWD = computed(() => (!editingExpense.value.yen) ? 0 : Math.round(editingExpense.value.yen * exchangeRate.value));
+
+                const magicSummaryQuote = computed(() => {
+                    const amount = todayTotalTWD.value;
+                    if (amount < 500) return '錢袋深處傳來規律的打呼聲，這點微小的加隆對小精靈毫無干擾。';
+                    if (amount < 1500) return '小精靈熟練地數出相應的加隆，並對這次的交易點頭表示認可。';
+                    if (amount < 3000) return '交出加隆時，小精靈的手指稍微用力捏了一下，眼神充滿了不捨。';
+                    if (amount < 5000) return '錢袋精靈正死命拉緊束口繩，滿頭大汗地試圖阻止加隆外流！';
+                    return '加隆如潰堤的洪水般傾瀉而下，連錢袋精靈都被這股金幣洪流沖走了。';
+                });
+
+                const pieChartData = computed(() => {
+                    const stats = {}; let total = 0;
+                    expenses.value.forEach(e => {
+                        if (!stats[e.type]) stats[e.type] = 0;
+                        stats[e.type] += e.yen;
+                        total += e.yen;
+                    });
+                    return Object.keys(stats).map(type => {
+                        const cat = expenseCategories.find(c => c.val === type);
+                        return {
+                            type, label: cat ? cat.label : type, color: cat ? cat.color : '#ccc',
+                            percent: (stats[type] / total) * 100, value: stats[type]
+                        };
+                    }).sort((a, b) => b.value - a.value);
+                });
+
+                const pieChartGradient = computed(() => {
+                    let gradient = 'conic-gradient('; let currentAngle = 0;
+                    pieChartData.value.forEach((d) => {
+                        const start = currentAngle; const end = currentAngle + d.percent;
+                        gradient += `${d.color} ${start}% ${end}%, `; currentAngle = end;
+                    });
+                    return gradient.slice(0, -2) + ')';
+                });
+
+                const lineChartData = computed(() => {
+                    return chapters.map(chap => {
+                        const total = expenses.value.filter(e => e.chapterId === chap.id).reduce((sum, e) => sum + e.yen, 0);
+                        return { id: chap.id, val: Math.round(total * exchangeRate.value) };
+                    });
+                });
+
+                const lineChartPath = computed(() => {
+                    const data = lineChartData.value;
+                    const max = Math.max(...data.map(d => d.val), 100);
+                    const width = 100; const height = 100; const step = width / (data.length - 1);
+                    let d = `M 0 ${height - (data[0].val / max * height * 0.8)}`;
+                    data.forEach((p, i) => {
+                        if (i === 0) return;
+                        const x = i * step; const y = height - (p.val / max * height * 0.8);
+                        const prevX = (i - 1) * step; const prevY = height - (data[i-1].val / max * height * 0.8);
+                        const cp1x = prevX + (x - prevX) / 2; const cp1y = prevY;
+                        const cp2x = prevX + (x - prevX) / 2; const cp2y = y;
+                        d += ` C ${cp1x} ${cp1y}, ${cp2x} ${cp2y}, ${x} ${y}`;
+                    });
+                    return d;
+                });
+
+                const lineChartAreaPath = computed(() => `${lineChartPath.value} L 100 100 L 0 100 Z`);
+                const lineChartDots = computed(() => {
+                    const data = lineChartData.value;
+                    const max = Math.max(...data.map(d => d.val), 100);
+                    const width = 100; const step = width / (data.length - 1);
+                    return data.map((d, i) => ({ x: i * step, y: 100 - (d.val / max * 100 * 0.8) }));
+                });
+
+                const formatMoney = (val) => val ? val.toLocaleString() : '0';
+                const getExpenseIcon = (type) => expenseCategories.find(c => c.val === type)?.icon || 'fa-solid fa-circle';
+                const getExpenseLabel = (type) => expenseCategories.find(c => c.val === type)?.label || type;
+                const getPaymentIcon = (pay) => ({ cash: 'fa-solid fa-coins', card: 'fa-regular fa-credit-card', suica: 'fa-solid fa-train' }[pay] || 'fa-solid fa-wallet');
+                const getChapterTotal = (chapId) => Math.round(expenses.value.filter(e => e.chapterId === chapId).reduce((sum, e) => sum + e.yen, 0) * exchangeRate.value);
+                const getChapterSummarySentence = (chapId) => {
+                    const exps = expenses.value.filter(e => e.chapterId === chapId);
+                    if (exps.length === 0) return '本章節尚未紀錄任何支出．加隆小精靈酣然沉睡';
+                    const counts = {}; exps.forEach(e => counts[e.type] = (counts[e.type] || 0) + e.yen);
+                    const topType = Object.keys(counts).reduce((a, b) => counts[a] > counts[b] ? a : b);
+                    const catLabel = expenseCategories.find(c => c.val === topType)?.label.split('(')[0] || '未知';
+                    return `以『${catLabel}』為主軸的加隆消耗日`;
+                };
+
+                const openExpenseModal = (mode) => {
+                    expenseModalMode.value = mode; confirmDeleteExpense.value = false;
+                    if (mode === 'add') { editingExpense.value = { id: Date.now(), chapterId: selectedChapter.value, type: 'potion', title: '', yen: null, twd: 0, payment: 'cash', note: '' }; }
+                    isExpenseModalOpen.value = true;
+                };
+                const editExpense = (exp) => { expenseModalMode.value = 'edit'; confirmDeleteExpense.value = false; editingExpense.value = { ...exp }; isExpenseModalOpen.value = true; };
+                const closeExpenseModal = () => isExpenseModalOpen.value = false;
+                const saveExpense = () => {
+                    if (!editingExpense.value.yen) return;
+                    if (expenseModalMode.value === 'add') {
+                        expenses.value.push({ ...editingExpense.value, twd: Math.round(editingExpense.value.yen * exchangeRate.value) });
+                    } else {
+                        const idx = expenses.value.findIndex(e => e.id === editingExpense.value.id);
+                        if (idx !== -1) expenses.value[idx] = { ...editingExpense.value, twd: Math.round(editingExpense.value.yen * exchangeRate.value) };
+                    }
+                    closeExpenseModal();
+                };
+                const deleteExpense = () => {
+                    const idx = expenses.value.findIndex(e => e.id === editingExpense.value.id);
+                    if (idx !== -1) expenses.value.splice(idx, 1);
+                    closeExpenseModal();
+                };
+
                 const toggleAI = () => showChatModal.value = !showChatModal.value;
 
-                onMounted(() => { setTimeout(() => isLoading.value = false, 1500); nextTick(() => initSortable()); });
-                watch(currentTab, (newVal) => { if (newVal === 'journal') nextTick(() => initSortable()); });
+                onMounted(() => {
+                    setTimeout(() => isLoading.value = false, 1500);
+                    nextTick(() => initSortable());
+                });
+                watch(currentTab, (newVal) => {
+                    if (newVal === 'journal') nextTick(() => initSortable());
+                    else if (sortableInstance) { sortableInstance.destroy(); sortableInstance = null; }
+                });
+                watch(selectedDate, () => nextTick(() => initSortable()));
 
                 return { 
                     isLoading, currentTab, 
+                    // Journal
+                    days, selectedDate, selectDay, getChapterTitle, getChapterSubtitle, currentEvents, getCategoryColor, getCategoryIcon,
+                    isModalOpen, openAddModal, editEvent, closeModal, saveEvent, editingEvent, eventTypes, modalMode, handleDelete, confirmDelete,
+                    
+                    // Guild & Supply
                     guildSubTab, guildData, guildTabs, selectedLayer, currentLayerData, selectedKyotoLayer, currentKyotoData,
-                    headerTitle, headerSubtitle, headerIcon,
+                    supplySubTab, supplyTabs, currentSupplyList,
+                    
+                    // Coins
+                    coinSubTab, coinTabs, chapters, selectedChapter, expenses, currentChapterExpenses, todayTotalTWD, todayTotalYen, grandTotalTWD, magicSummaryQuote,
+                    formatMoney, getExpenseIcon, getExpenseLabel, getPaymentIcon, isExpenseModalOpen, openExpenseModal, editExpense, closeExpenseModal, saveExpense, deleteExpense,
+                    expenseModalMode, editingExpense, expenseCategories, confirmDeleteExpense, exchangeRate, lastRateUpdate, calculatedTWD,
+                    pieChartData, pieChartGradient, lineChartPath, lineChartAreaPath, lineChartDots, getChapterTotal, getChapterSummarySentence, currentChapterInfo,
+                    
+                    // Bag
+                    bagMemo, checklistItems,
+
+                    headerTitle, headerSubtitle, headerIcon, showChatModal, toggleAI,
                     tabs: [
                         { id: 'journal', label: '日誌', icon: 'fa-solid fa-scroll' },
                         { id: 'guild', label: '公會', icon: 'fa-solid fa-book-journal-whills' },
                         { id: 'supply', label: '補給', icon: 'fa-solid fa-box-archive' },
                         { id: 'coins', label: '加隆', icon: 'fa-solid fa-coins' },
                         { id: 'bag', label: '行囊', icon: 'fa-solid fa-suitcase-rolling' }
-                    ], 
-                    days, selectedDate, selectDay, getChapterTitle, getChapterSubtitle, currentEvents, getCategoryColor, getCategoryIcon,
-                    isModalOpen, openAddModal, editEvent, closeModal, saveEvent, editingEvent, eventTypes, modalMode, handleDelete, confirmDelete,
-                    showChatModal, toggleAI,
+                    ],
                     weatherForecast: [ 
                         { date: '12/14', icon: 'fa-solid fa-sun text-yellow-300', low: '5°', high: '12°' }, 
                         { date: '12/15', icon: 'fa-solid fa-cloud text-gray-300', low: '4°', high: '10°' }, 
@@ -860,14 +1378,11 @@
                         { date: '12/18', icon: 'fa-solid fa-cloud-rain text-blue-300', low: '3°', high: '9°' }, 
                         { date: '12/19', icon: 'fa-solid fa-cloud text-gray-300', low: '4°', high: '11°' }, 
                         { date: '12/20', icon: 'fa-solid fa-sun text-yellow-300', low: '5°', high: '13°' } 
-                    ],
-                    // 補給相關
-                    supplySubTab,
-                    supplyTabs,
-                    currentSupplyList
+                    ]
                 };
             }
         }).mount('#app');
     </script>
 </body>
 </html>
+
