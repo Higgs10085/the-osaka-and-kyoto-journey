@@ -57,6 +57,10 @@
             background: linear-gradient(to bottom, #dbeafe 0%, #1e3a8a 50%, #020617 100%);
             color: #e2e8f0; -webkit-tap-highlight-color: transparent;
         }
+        /* Safe Area for Mobile Notch */
+        .pt-safe { padding-top: env(safe-area-inset-top); }
+        .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
+
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         .glass-panel {
@@ -82,21 +86,17 @@
         .scroller { overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior-y: contain; -ms-overflow-style: none; scrollbar-width: none; }
         .scroller::-webkit-scrollbar { display: none; }
         
-        /* Checkbox Custom Style */
         .magic-checkbox { appearance: none; width: 20px; height: 20px; border: 2px solid #a5f3fc; border-radius: 6px; position: relative; cursor: pointer; transition: all 0.2s; }
         .magic-checkbox:checked { background: #a5f3fc; }
         .magic-checkbox:checked::after { content: '\f00c'; font-family: "Font Awesome 6 Free"; font-weight: 900; position: absolute; color: #0f172a; font-size: 12px; top: 50%; left: 50%; transform: translate(-50%, -50%); }
 
-        /* Coins Page Specifics */
         .ice-card {
             background: rgba(242, 247, 250, 0.08); backdrop-filter: blur(20px);
             border: 1px solid rgba(167, 215, 255, 0.2);
             box-shadow: 0 0 15px rgba(167, 215, 255, 0.05);
         }
         .pie-chart {
-            border-radius: 50%;
-            position: relative;
-            box-shadow: 0 0 20px rgba(167, 215, 255, 0.15);
+            border-radius: 50%; position: relative; box-shadow: 0 0 20px rgba(167, 215, 255, 0.15);
         }
         .pie-chart::after {
             content: ""; position: absolute; inset: 25%; background: rgba(46, 51, 56, 0.9); border-radius: 50%;
@@ -129,19 +129,19 @@
 
         <div v-else class="flex flex-col h-full w-full overflow-hidden">
             
-            <header class="glass-panel px-3 py-1 flex justify-between items-center z-20 shrink-0 border-b-0 rounded-b-3xl mx-2 mt-0">
+            <header class="glass-panel px-3 py-2 flex justify-between items-center z-20 shrink-0 border-b-0 rounded-b-3xl mx-2 mt-2 pt-safe">
                 <div class="flex items-center gap-2 overflow-hidden flex-1 mr-2">
                     <div class="w-10 h-10 rounded-full border border-magic-ice/40 flex items-center justify-center bg-black/30 relative shrink-0 animate-spin-slow shadow-[0_0_10px_rgba(165,243,252,0.3)]">
                         <div class="absolute inset-0 border border-white/10 rounded-full"></div>
                         <i :class="headerIcon" class="text-magic-ice text-base"></i>
                     </div>
-                    <div class="flex flex-col sm:flex-row sm:items-baseline sm:gap-2 min-w-0">
-                        <h1 class="text-sm font-bold text-white tracking-wider whitespace-nowrap text-glow">{{ headerTitle }}</h1>
-                        <span class="text-[16px] text-cyan-200 font-cursive leading-none truncate relative top-[2px]">{{ headerSubtitle }}</span>
+                    <div class="flex flex-col justify-center min-w-0 flex-1">
+                        <h1 class="text-sm font-bold text-white tracking-wider truncate text-glow">{{ headerTitle }}</h1>
+                        <span class="text-[12px] text-cyan-200 font-cursive leading-none truncate">{{ headerSubtitle }}</span>
                     </div>
                 </div>
                 <div @click="toggleAI" class="flex items-center gap-1 shrink-0 active:scale-95 transition-transform cursor-pointer">
-                    <span class="text-[12px] text-magic-ice/80 font-bold tracking-tight">召喚使魔</span>
+                    <span class="text-[10px] text-magic-ice/80 font-bold tracking-tight">召喚使魔</span>
                     <div class="w-8 h-8 rounded-full border border-magic-ice/30 flex items-center justify-center bg-white/5 active:bg-magic-ice/20 transition-colors">
                         <i class="fa-solid fa-cat text-white text-xs"></i>
                     </div>
@@ -153,17 +153,13 @@
                 <div v-if="currentTab === 'journal'" class="flex flex-col h-full min-h-0">
                     <section class="mt-1 px-4 shrink-0">
                         <div class="flex flex-wrap items-baseline gap-x-2 gap-y-0.5 mb-0.5 pl-4 pr-2">
-                            
                             <div class="flex items-center gap-2 shrink-0">
                                 <i class="fa-solid fa-star-of-david text-[13px] text-cyan-200 animate-pulse"></i>
                                 <span class="text-[13px] text-cyan-200 font-bold tracking-widest text-shadow-sm">星象廳觀測報告</span>
                             </div>
-
                             <a href="https://tenki.jp/forecast/6/29/6110/26100/10days.html" target="_blank" 
                                class="group cursor-pointer flex items-center gap-1 transition-all active:scale-95 opacity-90 hover:opacity-100">
-                                
                                 <i class="fa-solid fa-fire text-[10px] text-amber-400 group-hover:scale-110 transition-transform drop-shadow-[0_0_5px_rgba(251,191,36,0.8)]"></i>
-                                
                                 <span class="text-[10px] text-amber-300 font-bold italic border-b border-dashed border-amber-500/40 pb-0.5 group-hover:text-amber-100 group-hover:border-amber-200 transition-colors tracking-wide drop-shadow-md">
                                     妖族：京都可是咱們的地盤 愛看不看隨你
                                 </span>
@@ -173,29 +169,26 @@
                         <div class="flex gap-2 overflow-x-auto no-scrollbar pb-1 snap-x">
                             <div v-for="w in weatherForecast" :key="w.date" 
                                  class="snap-start shrink-0 w-16 h-16 glass-panel rounded-xl flex flex-col items-center justify-center gap-0 relative overflow-hidden hover:bg-white/5 transition-colors border border-white/10 shadow-[0_4px_15px_rgba(0,0,0,0.3)]">
-                                
                                 <span class="text-[10px] text-gray-300 font-sans tracking-wide font-bold leading-none mt-1">{{ w.date }}</span>
-                                
                                 <i :class="w.icon" class="text-base my-0.5 drop-shadow-md filter"></i>
-                                
                                 <div class="flex items-center gap-0.5 text-[10px] font-bold leading-none mb-1">
                                     <span class="text-blue-300">{{ w.low }}</span>
                                     <span class="text-gray-600">/</span>
                                     <span class="text-red-300">{{ w.high }}</span>
                                 </div>
-
                                 <div class="absolute -top-4 -right-4 w-6 h-6 bg-magic-ice/5 rounded-full blur-lg pointer-events-none"></div>
                             </div>
                         </div>
                     </section>
-                    <div class="shrink-0 py-1.5 px-4 overflow-x-auto no-scrollbar flex gap-2 snap-x">
+
+                    <div class="shrink-0 py-1.5 px-4 overflow-x-auto no-scrollbar flex gap-2 snap-x items-center">
                         <div v-for="(day, index) in days" :key="index" @click="selectDay(day.date)"
-                            class="snap-start shrink-0 w-14 h-14 rounded-xl border flex flex-col items-center justify-center transition-all duration-300 relative overflow-hidden group cursor-pointer"
-                            :class="selectedDate === day.date ? 'bg-magic-ice/20 border-magic-ice shadow-[0_0_15px_rgba(165,243,252,0.2)]' : 'bg-black/30 border-white/10'">
-                            <span class="text-xs font-bold z-10 font-sans leading-none" :class="selectedDate === day.date ? 'text-white' : 'text-gray-300'">{{ day.week }}</span>
-                            <span class="text-base font-bold z-10 leading-none mt-0.5" :class="selectedDate === day.date ? 'text-cyan-300' : 'text-white'">{{ day.day }}</span>
+                            class="snap-start shrink-0 w-10 h-10 rounded-full border flex items-center justify-center transition-all duration-300 relative overflow-hidden group cursor-pointer"
+                            :class="selectedDate === day.date ? 'bg-magic-ice/20 border-magic-ice shadow-[0_0_15px_rgba(165,243,252,0.4)] scale-110' : 'bg-black/30 border-white/10'">
+                            <span class="text-sm font-bold font-mono leading-none" :class="selectedDate === day.date ? 'text-white' : 'text-gray-400'">{{ day.day }}</span>
                         </div>
                     </div>
+
                     <div class="px-5 py-0 text-left shrink-0 mb-1">
                         <h2 class="text-white drop-shadow-md flex items-center justify-start gap-2 flex-wrap">
                             <span class="font-cursive text-2xl text-magic-ice leading-none mt-0">{{ getChapterTitle(selectedDate) }}</span>
@@ -228,7 +221,7 @@
                             </div>
                         </div>
                     </div>
-                    <button @click="openAddModal" class="absolute bottom-20 right-5 w-12 h-12 rounded-full bg-gradient-to-br from-magic-ice to-cyan-600 text-magic-dark shadow-[0_8px_20px_rgba(165,243,252,0.4)] flex items-center justify-center text-xl active:scale-90 transition-transform z-30 border-2 border-white/20">
+                    <button @click="openAddModal" class="absolute bottom-24 right-5 w-12 h-12 rounded-full bg-gradient-to-br from-magic-ice to-cyan-600 text-magic-dark shadow-[0_8px_20px_rgba(165,243,252,0.4)] flex items-center justify-center text-xl active:scale-90 transition-transform z-30 border-2 border-white/20">
                         <i class="fa-solid fa-plus"></i>
                     </button>
                 </div>
@@ -618,7 +611,7 @@
                     <div class="flex-1 scroller px-4 pb-24 space-y-5 animate-fade-in pt-3">
                         
                         <div class="glass-panel rounded-2xl p-4 border border-white/10">
-                            <h3 class="text-lg font-bold text-white mb-3 flex items-center gap-2"><i class="fa-solid fa-plane-departure text-magic-ice"></i> 飛行日誌</h3>
+                            <h3 class="text-lg font-bold text-white mb-3 flex items-center gap-2"><i class="fa-solid fa-plane-departure text-magic-ice"></i> 龍鱗飛艇航行日誌</h3>
                             <div class="mb-4">
                                 <div class="flex items-center gap-2 mb-2">
                                     <span class="px-2 py-0.5 rounded-md bg-blue-900/50 border border-blue-400/30 text-[10px] text-blue-200 font-bold">Main Team</span>
@@ -760,15 +753,16 @@
                     <p class="text-sm">功能開發中</p>
                 </div>
             </main>
-            <nav class="fixed bottom-0 left-0 right-0 glass-panel border-t border-t-white/15 border-x-0 border-b-0 rounded-t-3xl flex justify-between px-6 items-center pt-1 pb-safe z-40 bg-[#0f172a]/95 backdrop-blur-xl h-[70px]">
+            
+            <nav class="fixed bottom-0 left-0 right-0 glass-panel border-t border-t-white/15 border-x-0 border-b-0 rounded-t-3xl flex justify-between px-6 items-center pt-1 pb-safe z-40 bg-[#0f172a]/95 backdrop-blur-xl h-[55px]">
                 <button v-for="tab in tabs" :key="tab.id" @click="currentTab = tab.id"
-                    class="relative flex flex-col items-center justify-center w-14 gap-0 transition-all duration-300 group"
+                    class="relative flex flex-col items-center justify-center w-12 gap-0 transition-all duration-300 group"
                     :class="currentTab === tab.id ? (tab.id === 'coins' ? 'text-magic-blue' : 'text-magic-ice') : 'text-gray-500 hover:text-gray-300'">
                     <div class="relative transition-all duration-300" :class="currentTab === tab.id ? '-translate-y-0.5' : ''">
-                        <i :class="tab.icon" class="text-[26px] mb-0.5"></i>
+                        <i :class="tab.icon" class="text-[20px] mb-0.5"></i>
                         <div v-if="currentTab === tab.id" class="absolute -inset-2 bg-magic-ice/20 blur-lg rounded-full"></div>
                     </div>
-                    <span class="text-[10px] font-medium tracking-wide transition-colors duration-300 leading-none" :class="currentTab === tab.id ? 'text-white' : 'text-gray-500 group-hover:text-gray-400'">{{ tab.label }}</span>
+                    <span class="text-[9px] font-medium tracking-wide transition-colors duration-300 leading-none scale-90 origin-top" :class="currentTab === tab.id ? 'text-white' : 'text-gray-500 group-hover:text-gray-400'">{{ tab.label }}</span>
                     <div v-if="currentTab === tab.id" class="absolute -bottom-1 w-1 h-1 bg-magic-ice rounded-full shadow-[0_0_8px_#a5f3fc]"></div>
                 </button>
             </nav>
@@ -1173,7 +1167,7 @@
                     ],
                     labyrinth: [
                         { id: 'layer1', name: '第一層：難波', title: '難波 (Namba)', rpgTitle: '【人類聚集地】', colorClass: 'border-l-blue-400', desc: '迷宮的起點與物資集散地。人流混雜，擁有最強大的電器軍火庫與轉運樞紐。', spots: [
-                                { name: 'EDION 愛電王 難波店', desc: '裝備庫', map: 'https://www.google.com/maps/search/?api=1&query=EDION+Namba', items: ['實惠的 Apple 手機/平板/筆電 (匯率優勢)', '各類電子護符'] },
+                                { name: 'EDION 愛電王 難波店', desc: '裝備庫', map: 'https://www.google.com/maps/search/?api=1&query=EDION+Namba', items: ['國王賈伯斯的遺產', '精靈語之鏡(iPhone)', '賢者之書(Mac Book)','天啟觀測儀板(iPad)', '靈契時刻環(Apple Watch)', '靈脈聲導石(AirPods)', '各類魔導護符與魔法道具']},
                                 { name: 'BicCamera 難波店', desc: '大型軍火庫', map: 'https://www.google.com/maps/search/?api=1&query=BicCamera+Namba', items: ['風屬性法杖：Panasonic 吹風機', '風暴神器：Dyson Supersonic', '回春儀式道具：Panasonic 美容儀', '心靈通訊器：Sony/Bose 無線耳機', '次元收納箱：LOJEL 行李箱', '精密計時器：日製手錶', '熱源保存瓶：虎牌保溫瓶', '鍊金電子鍋：象印', '記憶封存板：FUJIFILM 拍立得'] }
                         ]},
                         { id: 'layer2', name: '第二層：心齋橋', title: '心齋橋筋 + 道頓堀', rpgTitle: '【獸族領地】', colorClass: 'border-l-orange-500', desc: '充滿慾望與霓虹燈光的繁華領域，巨型招牌如同神獸般俯瞰著冒險者。', spots: [
