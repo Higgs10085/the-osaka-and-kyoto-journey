@@ -708,7 +708,7 @@
                             <p class="text-sm font-bold text-white mb-1">ホテルフォルツァ京都四条河原町</p>
                             <p class="text-xs text-gray-300 mb-2 font-mono">TEL 075-254-8251</p>
                             <p class="text-xs text-gray-400 leading-relaxed border-t border-white/10 pt-2">〒600-8005 京都府京都市下京区四条通麩屋町西入立売東町25-1</p>
-                            <a href="https://maps.app.goo.gl/9Z1jZ1jZ1jZ1jZ1j" target="_blank" class="inline-flex items-center gap-1.5 text-[10px] text-magic-ice mt-2 bg-magic-ice/10 px-2 py-1 rounded-lg"><i class="fa-solid fa-map-location-dot"></i> 開啟地圖</a>
+                           <a href="https://www.google.com/maps/search/?api=1&query=Hotel+Forza+Kyoto+Shijo+Kawaramachi" target="_blank" class="inline-flex items-center gap-1.5 text-[10px] text-magic-ice mt-2 bg-magic-ice/10 px-2 py-1 rounded-lg"><i class="fa-solid fa-map-location-dot"></i> 開啟地圖</a>
                         </div>
 
                         <div class="glass-panel rounded-2xl p-4 border border-white/10">
@@ -894,7 +894,13 @@
                             <div>
                                 <label class="text-xs text-magic-blue/70 mb-1 block">消費類別 (Category)</label>
                                 <div class="grid grid-cols-4 gap-2">
-                                    <button v-for="cat in expenseCategories" :key="cat.val" @click="editingExpense.type = cat.val" class="flex flex-col items-center justify-center p-2 rounded-lg border transition-all aspect-square" :class="editingExpense.type === cat.val ? 'bg-magic-blue/20 border-magic-blue text-white' : 'bg-transparent border-white/10 text-gray-500'"><i :class="cat.icon" class="mb-1 text-sm"></i><span class="text-[9px] scale-90">{{ cat.label.split('(')[0] }}</span></button>
+                                    <button v-for="cat in expenseCategories" :key="cat.val" @click="editingExpense.type = cat.val"
+                                        class="flex flex-col items-center justify-center p-1 rounded-xl border transition-all aspect-square active:scale-95"
+                                        :class="editingExpense.type === cat.val ? 'bg-magic-blue/20 border-magic-blue text-white shadow-[0_0_10px_rgba(167,215,255,0.3)]' : 'bg-transparent border-white/10 text-gray-500 hover:bg-white/5'">
+                                        <i :class="cat.icon" class="mb-0.5 text-xl"></i>
+                                        <span class="text-[11px] font-bold tracking-tight leading-none">{{ cat.label.split('(')[0] }}</span>
+                                    </button>
+
                                 </div>
                             </div>
                             <div>
