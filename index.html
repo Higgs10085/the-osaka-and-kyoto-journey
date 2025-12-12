@@ -254,10 +254,31 @@
                         </div>
                     </div>
                     <div v-else-if="guildSubTab === 'labyrinth'" class="flex-1 flex flex-col min-h-0 animate-fade-in">
-                        <div class="px-4 pb-2 overflow-x-auto no-scrollbar flex gap-2 shrink-0">
+                        <div class="px-4 pb-4 pt-2 overflow-x-auto no-scrollbar flex gap-2 shrink-0 snap-x">
                             <button v-for="layer in guildData.labyrinth" :key="layer.id" @click="selectedLayer = layer.id"
-                                class="px-3 py-1.5 rounded-full border text-[11px] font-bold whitespace-nowrap transition-all"
-                                :class="selectedLayer === layer.id ? 'bg-white text-magic-dark border-white' : 'bg-black/30 text-gray-400 border-white/10'">{{ layer.name }}</button>
+                                class="snap-start relative px-3 py-2 rounded-xl border transition-all duration-300 flex flex-col items-center justify-center min-w-[76px] gap-1 group overflow-hidden shrink-0"
+                                :class="selectedLayer === layer.id ? 'text-magic-dark scale-105' : 'bg-black/40 text-gray-400 hover:bg-black/60 hover:text-gray-200'"
+                                :style="{
+                                    borderColor: layer.themeColor,
+                                    backgroundColor: selectedLayer === layer.id ? layer.themeColor : '',
+                                    boxShadow: selectedLayer === layer.id ? `0 0 20px ${layer.themeColor}90` : '' 
+                                }">
+                                
+                                <div v-if="selectedLayer !== layer.id" class="absolute inset-0 opacity-0 group-hover:opacity-20 transition-opacity duration-300" 
+                                     :style="{ backgroundColor: layer.themeColor }"></div>
+
+                                <span class="text-[10px] font-mono tracking-widest opacity-90 font-bold" 
+                                      :class="selectedLayer === layer.id ? 'text-magic-dark' : 'text-gray-500'"
+                                      :style="{ color: selectedLayer !== layer.id ? layer.themeColor : '' }">
+                                    {{ layer.level }}
+                                </span>
+
+                                <div class="flex items-center gap-1.5">
+                                    <i :class="layer.icon" class="text-xs transition-colors duration-300" 
+                                       :style="{ color: selectedLayer === layer.id ? '#020617' : layer.themeColor }"></i>
+                                    <span class="text-xs font-bold whitespace-nowrap">{{ layer.shortName }}</span>
+                                </div>
+                            </button>
                         </div>
                         <div class="flex-1 scroller px-4 pb-24 relative">
                             <div v-if="currentLayerData" class="animate-fade-in">
@@ -273,7 +294,7 @@
                                             <a :href="spot.map" target="_blank" class="w-6 h-6 rounded-full bg-white/10 flex items-center justify-center text-magic-ice hover:bg-white/20"><i class="fa-solid fa-location-arrow text-[10px]"></i></a>
                                         </div>
                                         <ul v-if="spot.items" class="space-y-1.5">
-                                            <li v-for="item in spot.items" :key="item" class="text-[11px] text-gray-400 flex items-start gap-1.5 pl-1 border-l border-white/10"><span class="text-white/60">▪</span> {{ item }}</li>
+                                           <li v-for="item in spot.items" :key="item" class="text-sm text-gray-300 flex items-start gap-2 pl-1 border-l-2 border-white/10"> <span class="text-magic-ice mt-0.5 text-xs">◈</span> {{ item }}
                                         </ul>
                                         <p v-else class="text-[11px] text-gray-400 pl-1">{{ spot.desc }}</p>
                                     </div>
@@ -343,8 +364,8 @@
                     </div>
 
                     <div class="px-5 pb-1 shrink-0 text-center">
-                        <p v-if="supplySubTab === 'osaka'" class="text-[11px] text-gray-300 leading-relaxed">大阪迷宮飯：回復體力與士氣的補給站。</p>
-                        <p v-else class="text-[11px] text-gray-300 leading-relaxed">京都靈脈寶庫：能帶回原本世界的珍稀素材。</p>
+                        <p v-if="supplySubTab === 'osaka'" class="text-[11px] text-gray-300 leading-relaxed">迷宮飯：大阪地下城的補給料理與出發前規劃的戰場糧食。</p>
+                        <p v-else class="text-[11px] text-gray-300 leading-relaxed">靈脈礦石：妖都的礦石與護符素材，用來強化裝備與穩定靈脈。</p>
                     </div>
 
                     <div class="flex-1 scroller no-scrollbar px-4 pb-24 pt-2">
@@ -516,11 +537,7 @@
                             </div>
                         </div>
 
-                        <button @click="openExpenseModal('add')" 
-                            class="absolute bottom-24 right-5 w-14 h-14 rounded-full bg-magic-night border border-magic-blue text-magic-blue shadow-[0_0_20px_rgba(167,215,255,0.3)] flex items-center justify-center text-2xl active:scale-90 transition-transform z-30 group overflow-hidden">
-                            <div class="absolute inset-0 bg-magic-blue/20 rounded-full scale-0 group-active:scale-150 transition-transform duration-300"></div>
-                            <i class="fa-solid fa-plus relative z-10"></i>
-                        </button>
+                        <button @click="openExpenseModal('add')" class="absolute bottom-24 right-5 w-14 h-14 rounded-full bg-magic-night border border-magic-blue text-magic-blue shadow-[0_0_20px_rgba(167,215,255,0.3)] flex items-center justify-center text-2xl active:scale-90 transition-transform z-30 group overflow-hidden"> <div class="absolute inset-0 bg-magic-blue/20 rounded-full scale-0 group-active:scale-150 transition-transform duration-300"></div> <i class="fa-solid fa-plus relative z-10"></i> </button>
                     </div>
 
                     <div v-else-if="coinSubTab === 'stats'" class="flex-1 scroller px-4 pb-24 pt-2 animate-fade-in">
@@ -603,10 +620,16 @@
                                 <i class="fa-regular fa-clock mr-1"></i> 加隆匯率更新於 {{ lastRateUpdate }}
                             </p>
                         </div>
+
+                    <div class="mt-6 text-center pb-8">
+                        <button @click="resetData" class="text-[11px] text-red-400/80 border border-red-500/30 px-4 py-2 rounded-xl hover:bg-red-500/10 active:scale-95 transition-all">
+                            <i class="fa-solid fa-trash-can mr-2"></i>銷毀紀錄 (重置)
+                        </button>
+                        <p class="text-[9px] text-gray-600 mt-2">若資料異常或想重新開始，請點擊此處</p>
                     </div>
 
                 </div>
-
+              </div>    
                 <div v-else-if="currentTab === 'bag'" class="flex flex-col h-full min-h-0 font-serif">
                     <div class="flex-1 scroller px-4 pb-24 space-y-5 animate-fade-in pt-3">
                         
@@ -614,7 +637,7 @@
                             <h3 class="text-lg font-bold text-white mb-3 flex items-center gap-2"><i class="fa-solid fa-plane-departure text-magic-ice"></i> 龍鱗飛艇航行日誌</h3>
                             <div class="mb-4">
                                 <div class="flex items-center gap-2 mb-2">
-                                    <span class="px-2 py-0.5 rounded-md bg-blue-900/50 border border-blue-400/30 text-[10px] text-blue-200 font-bold">Main Team</span>
+                                    <span class="px-2 py-0.5 rounded-md bg-blue-900/50 border border-blue-400/30 text-[10px] text-blue-200 font-bold">主隊</span>
                                     <span class="h-[1px] flex-1 bg-white/10"></span>
                                 </div>
                                 <div class="grid grid-cols-2 gap-2 text-xs">
@@ -638,7 +661,7 @@
                             </div>
                             <div>
                                 <div class="flex items-center gap-2 mb-2">
-                                    <span class="px-2 py-0.5 rounded-md bg-purple-900/50 border border-purple-400/30 text-[10px] text-purple-200 font-bold">Sub Team</span>
+                                    <span class="px-2 py-0.5 rounded-md bg-purple-900/50 border border-purple-400/30 text-[10px] text-purple-200 font-bold">分隊</span>
                                     <span class="h-[1px] flex-1 bg-white/10"></span>
                                 </div>
                                 <div class="grid grid-cols-2 gap-2 text-xs">
@@ -765,19 +788,11 @@
                     <span class="text-[9px] font-medium tracking-wide transition-colors duration-300 leading-none scale-90 origin-top" :class="currentTab === tab.id ? 'text-white' : 'text-gray-500 group-hover:text-gray-400'">{{ tab.label }}</span>
                     <div v-if="currentTab === tab.id" class="absolute -bottom-1 w-1 h-1 bg-magic-ice rounded-full shadow-[0_0_8px_#a5f3fc]"></div>
                 </button>
-            </nav>
-            
-            <transition
-            enter-active-class="transition duration-300 ease-out"
-            enter-from-class="translate-y-full opacity-0"
-            enter-to-class="translate-y-0 opacity-100"
-            leave-active-class="transition duration-200 ease-in"
-            leave-from-class="translate-y-0 opacity-100"
-            leave-to-class="translate-y-full opacity-0"
-            >
+             </nav>
+
+            <transition enter-active-class="transition duration-300 ease-out" enter-from-class="translate-y-full opacity-0" enter-to-class="translate-y-0 opacity-100" leave-active-class="transition duration-200 ease-in" leave-from-class="translate-y-0 opacity-100" leave-to-class="translate-y-full opacity-0">
                 <div v-if="showChatModal" class="fixed inset-0 z-[80] flex flex-col justify-end">
                     <div @click="toggleAI" class="absolute inset-0 bg-black/70 backdrop-blur-sm"></div>
-
                     <div class="bottom-sheet w-full rounded-t-[2rem] p-5 pt-4 relative z-10 animate-slide-up bg-slate-950/95 border-t border-magic-ice/40 flex flex-col h-[70vh]">
                         <div class="w-12 h-1.5 bg-gray-600 rounded-full mx-auto mb-4 opacity-40"></div>
                         <div class="flex items-center justify-between mb-4 border-b border-white/10 pb-2">
@@ -794,7 +809,6 @@
                                 <i class="fa-solid fa-times"></i>
                             </button>
                         </div>
-
                         <div class="mb-3">
                             <label class="text-[11px] text-magic-ice/80 mb-1 ml-1 block flex items-center gap-1">
                                 <i class="fa-solid fa-key text-[10px]"></i> 契約之鑰（Google API Key）
@@ -804,7 +818,6 @@
                                 <span class="text-magic-ice/80">提示：</span>此 Key 不會被儲存，只在本頁執行時暫時使用。
                             </p>
                         </div>
-
                         <div class="flex-1 chat-scroll overflow-y-auto space-y-3 rounded-2xl bg-black/40 border border-white/10 p-3 mt-2">
                             <div v-for="(msg, idx) in chatHistory" :key="idx" class="flex" :class="msg.role === 'user' ? 'justify-end' : 'justify-start'">
                                 <div v-if="msg.role === 'model'" class="max-w-[80%] bg-slate-800/90 border border-magic-ice/40 rounded-2xl rounded-tl-sm px-3 py-2 text-[13px] text-gray-100 shadow-[0_0_10px_rgba(165,243,252,0.25)]">
@@ -821,7 +834,6 @@
                                 </div>
                             </div>
                         </div>
-
                         <div class="mt-3 flex items-center gap-2 pt-2 border-t border-white/10">
                             <input v-model="chatInput" @keyup.enter="summonFamiliar" type="text" placeholder="輸入想問的大阪／京都問題，或請貓貓幫忙翻譯..." class="magic-input flex-1 text-sm" />
                             <button @click="summonFamiliar" :disabled="isSummoning" class="w-10 h-10 rounded-full bg-magic-ice text-magic-dark flex items-center justify-center active:scale-95 disabled:opacity-60">
@@ -841,47 +853,23 @@
                             {{ modalMode === 'add' ? '撰寫新冒險' : '修訂冒險記錄' }}
                         </h3>
                         <div class="space-y-3">
-                            <div>
-                                <label class="text-xs text-magic-ice/70 mb-1 block">時間 (Time)</label>
-                                <input v-model="editingEvent.time" type="time" class="magic-input">
-                            </div>
-                            <div>
-                                <label class="text-xs text-magic-ice/70 mb-1 block">標題 (Title)</label>
-                                <input v-model="editingEvent.title" type="text" class="magic-input" placeholder="例如：攻略大阪城">
-                            </div>
+                            <div><label class="text-xs text-magic-ice/70 mb-1 block">時間 (Time)</label><input v-model="editingEvent.time" type="time" class="magic-input"></div>
+                            <div><label class="text-xs text-magic-ice/70 mb-1 block">標題 (Title)</label><input v-model="editingEvent.title" type="text" class="magic-input" placeholder="例如：攻略大阪城"></div>
                             <div>
                                 <label class="text-xs text-magic-ice/70 mb-1 block">類別 (Type)</label>
                                 <div class="flex gap-2 overflow-x-auto no-scrollbar pb-1">
-                                    <button v-for="type in eventTypes" :key="type.val" @click="editingEvent.type = type.val"
-                                        class="px-3 py-1.5 rounded-lg border text-xs shrink-0 transition-all"
-                                        :class="editingEvent.type === type.val ? 'bg-magic-ice text-magic-dark border-magic-ice font-bold' : 'bg-transparent text-gray-400 border-white/20'">
-                                        <i :class="type.icon" class="mr-1"></i>{{ type.label }}
-                                    </button>
+                                    <button v-for="type in eventTypes" :key="type.val" @click="editingEvent.type = type.val" class="px-3 py-1.5 rounded-lg border text-xs shrink-0 transition-all" :class="editingEvent.type === type.val ? 'bg-magic-ice text-magic-dark border-magic-ice font-bold' : 'bg-transparent text-gray-400 border-white/20'"><i :class="type.icon" class="mr-1"></i>{{ type.label }}</button>
                                 </div>
                             </div>
-                            <div>
-                                <label class="text-xs text-magic-ice/70 mb-1 block">內容 (Description)</label>
-                                <textarea v-model="editingEvent.desc" rows="3" class="magic-input resize-none" placeholder="記錄細節..."></textarea>
-                            </div>
+                            <div><label class="text-xs text-magic-ice/70 mb-1 block">內容 (Description)</label><textarea v-model="editingEvent.desc" rows="3" class="magic-input resize-none" placeholder="記錄細節..."></textarea></div>
                             <div class="grid grid-cols-2 gap-2">
-                                <div>
-                                    <label class="text-xs text-magic-ice/70 mb-1 block">連結 (Link)</label>
-                                    <input v-model="editingEvent.link" type="text" class="magic-input text-xs" placeholder="URL">
-                                </div>
-                                <div>
-                                    <label class="text-xs text-magic-ice/70 mb-1 block">連結文字 (Text)</label>
-                                    <input v-model="editingEvent.linkText" type="text" class="magic-input text-xs" placeholder="顯示文字">
-                                </div>
+                                <div><label class="text-xs text-magic-ice/70 mb-1 block">連結 (Link)</label><input v-model="editingEvent.link" type="text" class="magic-input text-xs" placeholder="URL"></div>
+                                <div><label class="text-xs text-magic-ice/70 mb-1 block">連結文字 (Text)</label><input v-model="editingEvent.linkText" type="text" class="magic-input text-xs" placeholder="顯示文字"></div>
                             </div>
                         </div>
                         <div class="flex gap-3 mt-6">
-                            <button v-if="modalMode === 'edit'" @click="handleDelete" 
-                                class="flex-1 py-2.5 rounded-xl border border-red-500/50 text-red-400 hover:bg-red-500/10 transition-colors text-sm font-bold">
-                                {{ confirmDelete ? '確定刪除？' : '刪除' }}
-                            </button>
-                            <button @click="saveEvent" class="flex-[2] py-2.5 rounded-xl bg-magic-ice text-magic-dark font-bold hover:bg-white transition-colors shadow-[0_0_15px_rgba(165,243,252,0.4)] text-sm">
-                                儲存紀錄
-                            </button>
+                            <button v-if="modalMode === 'edit'" @click="handleDelete" class="flex-1 py-2.5 rounded-xl border border-red-500/50 text-red-400 hover:bg-red-500/10 transition-colors text-sm font-bold">{{ confirmDelete ? '確定刪除？' : '刪除' }}</button>
+                            <button @click="saveEvent" class="flex-[2] py-2.5 rounded-xl bg-magic-ice text-magic-dark font-bold hover:bg-white transition-colors shadow-[0_0_15px_rgba(165,243,252,0.4)] text-sm">儲存紀錄</button>
                         </div>
                         <button @click="closeModal" class="absolute top-4 right-4 text-gray-400 hover:text-white"><i class="fa-solid fa-times text-lg"></i></button>
                     </div>
@@ -894,60 +882,55 @@
                     <div class="glass-panel w-full max-w-sm rounded-2xl p-5 relative z-10 animate-slide-up border border-magic-blue/30 shadow-[0_0_30px_rgba(167,215,255,0.15)]">
                         <h3 class="text-xl font-bold text-white mb-4 flex items-center gap-2">
                             <i class="fa-solid fa-coins text-magic-blue"></i>
-                            {{ expenseModalMode === 'add' ? '紀錄新支出' : '修正帳目' }}
+                            {{ expenseModalMode === 'add' ? '消費紀錄' : '修正帳目' }}
                         </h3>
                         <div class="space-y-3">
                             <div>
                                 <label class="text-xs text-magic-blue/70 mb-1 block">金額 (JPY)</label>
-                                <div class="relative">
-                                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">¥</span>
-                                    <input v-model.number="editingExpense.yen" type="number" class="magic-input pl-8 font-mono text-lg text-yellow-200" placeholder="0">
-                                </div>
+                                <div class="relative"><span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">¥</span><input v-model.number="editingExpense.yen" type="number" class="magic-input pl-8 font-mono text-lg text-yellow-200" placeholder="0"></div>
                                 <p class="text-right text-[10px] text-gray-400 mt-1">≈ {{ calculatedTWD }} TWD</p>
                             </div>
-                            <div>
-                                <label class="text-xs text-magic-blue/70 mb-1 block">項目名稱 (Item)</label>
-                                <input v-model="editingExpense.title" type="text" class="magic-input" placeholder="例如：章魚燒">
-                            </div>
+                            <div><label class="text-xs text-magic-blue/70 mb-1 block">項目名稱 (Item)</label><input v-model="editingExpense.title" type="text" class="magic-input" placeholder="例如：章魚燒"></div>
                             <div>
                                 <label class="text-xs text-magic-blue/70 mb-1 block">消費類別 (Category)</label>
                                 <div class="grid grid-cols-4 gap-2">
-                                    <button v-for="cat in expenseCategories" :key="cat.val" @click="editingExpense.type = cat.val"
-                                        class="flex flex-col items-center justify-center p-2 rounded-lg border transition-all aspect-square"
-                                        :class="editingExpense.type === cat.val ? 'bg-magic-blue/20 border-magic-blue text-white' : 'bg-transparent border-white/10 text-gray-500'">
-                                        <i :class="cat.icon" class="mb-1 text-sm"></i>
-                                        <span class="text-[9px] scale-90">{{ cat.label.split('(')[0] }}</span>
-                                    </button>
+                                    <button v-for="cat in expenseCategories" :key="cat.val" @click="editingExpense.type = cat.val" class="flex flex-col items-center justify-center p-2 rounded-lg border transition-all aspect-square" :class="editingExpense.type === cat.val ? 'bg-magic-blue/20 border-magic-blue text-white' : 'bg-transparent border-white/10 text-gray-500'"><i :class="cat.icon" class="mb-1 text-sm"></i><span class="text-[9px] scale-90">{{ cat.label.split('(')[0] }}</span></button>
                                 </div>
                             </div>
                             <div>
-                                <label class="text-xs text-magic-blue/70 mb-1 block">支付方式 (Payment)</label>
+                                <label class="text-xs text-magic-blue/70 mb-1 block">付款方式 (Payment)</label>
                                 <div class="flex gap-2">
-                                    <button @click="editingExpense.payment = 'cash'" class="flex-1 py-1.5 rounded-lg border text-xs transition-all" :class="editingExpense.payment === 'cash' ? 'bg-magic-blue/20 border-magic-blue text-white' : 'border-white/10 text-gray-500'">現金</button>
-                                    <button @click="editingExpense.payment = 'card'" class="flex-1 py-1.5 rounded-lg border text-xs transition-all" :class="editingExpense.payment === 'card' ? 'bg-magic-blue/20 border-magic-blue text-white' : 'border-white/10 text-gray-500'">刷卡</button>
-                                    <button @click="editingExpense.payment = 'suica'" class="flex-1 py-1.5 rounded-lg border text-xs transition-all" :class="editingExpense.payment === 'suica' ? 'bg-magic-blue/20 border-magic-blue text-white' : 'border-white/10 text-gray-500'">IC卡</button>
+                                    <button @click="editingExpense.payment = 'cash'" class="flex-1 py-1.5 rounded-lg border text-xs transition-all flex items-center justify-center gap-1" :class="editingExpense.payment === 'cash' ? 'bg-magic-blue/20 border-magic-blue text-white' : 'border-white/10 text-gray-500'"><i class="fa-solid fa-coins"></i> 現金</button>
+                                    <button @click="editingExpense.payment = 'card'" class="flex-1 py-1.5 rounded-lg border text-xs transition-all flex items-center justify-center gap-1" :class="editingExpense.payment === 'card' ? 'bg-magic-blue/20 border-magic-blue text-white' : 'border-white/10 text-gray-500'"><i class="fa-regular fa-credit-card"></i> 信用卡</button>
+                                    <button @click="editingExpense.payment = 'suica'" class="flex-1 py-1.5 rounded-lg border text-xs transition-all flex items-center justify-center gap-1" :class="editingExpense.payment === 'suica' ? 'bg-magic-blue/20 border-magic-blue text-white' : 'border-white/10 text-gray-500'"><i class="fa-solid fa-train"></i> IC卡</button>
                                 </div>
                             </div>
                         </div>
-                        <div class="flex gap-3 mt-6">
-                            <button v-if="expenseModalMode === 'edit'" @click="deleteExpense" 
-                                class="flex-1 py-2.5 rounded-xl border border-red-500/50 text-red-400 hover:bg-red-500/10 transition-colors text-sm font-bold">
-                                刪除
-                            </button>
-                            <button @click="saveExpense" class="flex-[2] py-2.5 rounded-xl bg-magic-blue text-magic-dark font-bold hover:bg-white transition-colors shadow-[0_0_15px_rgba(167,215,255,0.4)] text-sm">
-                                寫入帳本
-                            </button>
+                        <div class="flex gap-3 mt-6 items-center">
+                            <button v-if="expenseModalMode === 'edit'" @click="requestDelete" class="w-10 h-10 rounded-xl border border-red-500/50 text-red-400 hover:bg-red-500/20 transition-all flex items-center justify-center active:scale-90" title="刪除此紀錄"><i class="fa-solid fa-trash-can"></i></button>
+                            <button @click="saveExpense" class="flex-1 py-2.5 rounded-xl bg-magic-blue text-magic-dark font-bold hover:bg-white transition-colors shadow-[0_0_15px_rgba(167,215,255,0.4)] text-sm">{{ expenseModalMode === 'add' ? '寫入魔導書' : '保存修正' }}</button>
                         </div>
+                        
+                        <transition enter-active-class="transition duration-200 ease-out" enter-from-class="opacity-0 scale-90" enter-to-class="opacity-100 scale-100" leave-active-class="transition duration-150 ease-in" leave-from-class="opacity-100 scale-100" leave-to-class="opacity-0 scale-90">
+                            <div v-if="showDeleteConfirm" class="absolute inset-0 z-20 bg-slate-900/95 backdrop-blur-md rounded-2xl flex flex-col items-center justify-center p-6 text-center border border-magic-blue/30">
+                                <div class="w-12 h-12 rounded-full bg-red-500/20 text-red-300 flex items-center justify-center mb-3 animate-pulse"><i class="fa-solid fa-burst text-xl"></i></div>
+                                <h4 class="text-white font-bold text-lg mb-2 text-glow">「光芒掃過，場中一切痕跡消散如煙。」</h4>
+                                <p class="text-xs text-gray-400 mb-6 leading-relaxed">確定要施展遺忘咒嗎？<br>這筆消費紀錄將無法復原。</p>
+                                <div class="flex gap-3 w-full">
+                                    <button @click="showDeleteConfirm = false" class="flex-1 py-2 rounded-lg border border-white/20 text-gray-300 text-xs hover:bg-white/10">取消詠唱</button>
+                                    <button @click="confirmDeleteAction" class="flex-1 py-2 rounded-lg bg-red-500/80 text-white text-xs font-bold hover:bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.4)]">遺忘咒 (刪除)</button>
+                                </div>
+                            </div>
+                        </transition>
+
                         <button @click="closeExpenseModal" class="absolute top-4 right-4 text-gray-400 hover:text-white"><i class="fa-solid fa-times text-lg"></i></button>
                     </div>
                 </div>
             </transition>
 
-        </div>
-    </div>
+        </div> </div>     <script type="module">
 
-    <script type="module">
-        import { GoogleGenerativeAI } from "@google/generative-ai";
+          import { GoogleGenerativeAI } from "@google/generative-ai";
 
         const { createApp, ref, computed, onMounted, nextTick, watch } = Vue;
 
@@ -1089,6 +1072,7 @@
                 const lastRateUpdate = ref('12/10 08:30');
                 const isExpenseModalOpen = ref(false);
                 const expenseModalMode = ref('add');
+                const showDeleteConfirm = ref(false);
                 const confirmDeleteExpense = ref(false);
                 const editingExpense = ref({ id: null, chapterId: 'ch1', type: 'potion', title: '', yen: null, twd: 0, payment: 'cash', note: '' });
 
@@ -1152,8 +1136,7 @@
                     { val: 'hotel', label: '住宿', icon: 'fa-solid fa-bed' },
                     { val: 'ticket', label: '門票', icon: 'fa-solid fa-ticket' },
                 ];
-                
-                const guildTabs = [
+const guildTabs = [
                     { id: 'castle', label: '魔王城', icon: 'fa-brands fa-fort-awesome' },
                     { id: 'labyrinth', label: '大阪迷宮', icon: 'fa-solid fa-dungeon' },
                     { id: 'kyoto', label: '京都靈脈', icon: 'fa-solid fa-torii-gate' }
@@ -1166,47 +1149,82 @@
                         { name: '京都御所 (Kyoto Imperial Palace)', desc: '舊皇族居住的神聖領域，結界感強烈。雖然沒有高聳城牆，但廣大的碎石路考驗著冒險者的耐心與鞋底。', tips: '佔地極廣，建議預留充裕時間進行迴避移動。', photo: '紫宸殿的朱紅色迴廊。', map: 'https://www.google.com/maps/search/?api=1&query=Kyoto+Imperial+Palace' }
                     ],
                     labyrinth: [
-                        { id: 'layer1', name: '第一層：難波', title: '難波 (Namba)', rpgTitle: '【人類聚集地】', colorClass: 'border-l-blue-400', desc: '迷宮的起點與物資集散地。人流混雜，擁有最強大的電器軍火庫與轉運樞紐。', spots: [
-                                { name: 'EDION 愛電王 難波店', desc: '裝備庫', map: 'https://www.google.com/maps/search/?api=1&query=EDION+Namba', items: ['國王賈伯斯的遺產', '精靈語之鏡(iPhone)', '賢者之書(Mac Book)','天啟觀測儀板(iPad)', '靈契時刻環(Apple Watch)', '靈脈聲導石(AirPods)', '各類魔導護符與魔法道具']},
+                        { 
+                            id: 'layer1', level: 'LV.1', name: '第一層：難波', shortName: '難波', title: '難波 (Namba)', rpgTitle: '【人類聚集地】', 
+                            colorClass: 'border-l-blue-400', themeColor: '#60a5fa', icon: 'fa-solid fa-train-subway', 
+                            desc: '迷宮的起點與物資集散地。人流混雜，擁有最強大的電器軍火庫與轉運樞紐。', 
+                            spots: [
+                                { name: 'EDION 愛電王 難波店', desc: '裝備庫', map: 'https://www.google.com/maps/search/?api=1&query=EDION+Namba', items: ['國王賈伯斯的遺產', '精靈語之鏡(iPhone)', '賢者之書(Mac Book)','天啟觀測儀板(iPad)', '靈契時刻環(Apple Watch)', '靈脈聲導石(AirPods)', '各類魔導護符與魔法道具'] },
                                 { name: 'BicCamera 難波店', desc: '大型軍火庫', map: 'https://www.google.com/maps/search/?api=1&query=BicCamera+Namba', items: ['風屬性法杖：Panasonic 吹風機', '風暴神器：Dyson Supersonic', '回春儀式道具：Panasonic 美容儀', '心靈通訊器：Sony/Bose 無線耳機', '次元收納箱：LOJEL 行李箱', '精密計時器：日製手錶', '熱源保存瓶：虎牌保溫瓶', '鍊金電子鍋：象印', '記憶封存板：FUJIFILM 拍立得'] }
-                        ]},
-                        { id: 'layer2', name: '第二層：心齋橋', title: '心齋橋筋 + 道頓堀', rpgTitle: '【獸族領地】', colorClass: 'border-l-orange-500', desc: '充滿慾望與霓虹燈光的繁華領域，巨型招牌如同神獸般俯瞰著冒險者。', spots: [
-                                { name: '固力果跑跑人', desc: '地下城大 BOSS (必拍地標)', map: 'https://www.google.com/maps/search/?api=1&query=Glico+Man+Sign' },
-                                { name: '大丸心齋橋百貨', desc: '獸族交易大殿 (華麗哥德風建築)', map: 'https://www.google.com/maps/search/?api=1&query=Daimaru+Shinsaibashi' },
-                                { name: '心齋橋 PARCO', desc: '多層幻境商城 (潮牌/動漫)', map: 'https://www.google.com/maps/search/?api=1&query=Shinsaibashi+PARCO' },
-                                { name: '惠比壽塔摩天輪', desc: '地下城小 BOSS (黃色迴轉塔)', map: 'https://www.google.com/maps/search/?api=1&query=Don+Quijote+Dotonbori' }
-                        ]},
-                        { id: 'layer3', name: '第三層：日本橋', title: '日本橋商圈', rpgTitle: '【魔族地盤】', colorClass: 'border-l-purple-500', desc: '魔力密度極高的區域，販售禁忌的魔道書(漫畫)、魔像(模型)與稀有卡牌。', spots: [
-                                { name: 'Animate 大阪日本橋', desc: '魔導書類圖書館', map: 'https://www.google.com/maps/search/?api=1&query=Animate+Osaka+Nipponbashi' },
-                                { name: '駿河屋 本館', desc: '二手聖遺物寶庫', map: 'https://www.google.com/maps/search/?api=1&query=Surugaya+Osaka+Nipponbashi' },
-                                { name: 'SUPER KIDS LAND', desc: '機巧兵團總部 (模型)', map: 'https://www.google.com/maps/search/?api=1&query=Super+Kids+Land+Main+Store' },
-                                { name: 'JUNGLE 總店', desc: '特攝與機甲魔像交易所', map: 'https://www.google.com/maps/search/?api=1&query=Jungle+Osaka+Nipponbashi' }
-                        ]},
-                        { id: 'layer4', name: '第四層：梅田', title: '梅田 (Umeda)', rpgTitle: '【精靈族領地】', colorClass: 'border-l-emerald-400', desc: '高聳入雲的玻璃巨塔森林，充滿高級感與秩序，是高階冒險者出沒之地。', spots: [
-                                { name: 'GRAND FRONT OSAKA', desc: '精靈王庭 (北館/南館)', map: 'https://www.google.com/maps/search/?api=1&query=Grand+Front+Osaka' },
-                                { name: 'LUCUA / LUCUA 1100', desc: '時尚精靈市集', map: 'https://www.google.com/maps/search/?api=1&query=LUCUA+Osaka' },
-                                { name: 'Yodobashi 梅田', desc: '精靈科技要塞', map: 'https://www.google.com/maps/search/?api=1&query=Yodobashi+Camera+Multimedia+Umeda' },
-                                { name: '大丸梅田店', desc: '任天堂與寶可夢中心所在地', map: 'https://www.google.com/maps/search/?api=1&query=Daimaru+Umeda' },
-                                { name: 'KITTE 大阪', desc: '新開啟的白之塔', map: 'https://www.google.com/maps/search/?api=1&query=KITTE+Osaka' }
-                        ]},
-                        { id: 'layer5', name: '第五層：地下街', title: '梅田地下迷宮', rpgTitle: '【黑暗精靈領地‧顛倒世界】', colorClass: 'border-l-slate-500', desc: '號稱「新手殺手」的複雜地下網絡。高濃度魔素(人流)匯集成河，容易迷失方向。', spots: [
-                                { name: '阪急三番街', desc: 'Kiddy Land 玩具巢穴', map: 'https://www.google.com/maps/search/?api=1&query=Hankyu+Sanbangai' },
-                                { name: 'UMEDA FOOD HALL', desc: '地下補給大廳', map: 'https://www.google.com/maps/search/?api=1&query=UMEDA+FOOD+HALL' },
-                                { name: 'DIAMOR OSAKA', desc: '大理石迴廊', map: 'https://www.google.com/maps/search/?api=1&query=Diamor+Osaka' },
-                                { name: 'Whity 梅田', desc: '白之地下道', map: 'https://www.google.com/maps/search/?api=1&query=Whity+Umeda' }
-                        ]},
-                        { id: 'layer6', name: '第六層：天王寺', title: '天王寺‧阿倍野', rpgTitle: '【神界】', colorClass: 'border-l-yellow-500', desc: '擁有全日本最高的結界塔，是距離天空最近的區域，同時保留著昭和時代的混沌感。', spots: [
-                                { name: '天王寺動物園', desc: '神獸以此為家', map: 'https://www.google.com/maps/search/?api=1&query=Tennoji+Zoo' },
-                                { name: '通天閣', desc: '舊時代的神之塔', map: 'https://www.google.com/maps/search/?api=1&query=Tsutenkaku' },
-                                { name: '阿倍野 HARUKAS 300', desc: '天空迴廊 (絕景展望台)', map: 'https://www.google.com/maps/search/?api=1&query=Abeno+Harukas+300' },
-                                { name: '新世界本通商店街', desc: '下町神界 (串炸聖地)', map: 'https://www.google.com/maps/search/?api=1&query=Shinsekai+Hondori' }
-                        ]},
-                        { id: 'special', name: '特殊點', title: '隱藏支線', rpgTitle: '【特殊能力獲取點】', colorClass: 'border-l-pink-500', desc: '散落在迷宮各處的特殊祭壇與工坊，可獲得強力 Buff。', spots: [
-                                { name: '難波八阪神社', desc: '巨大獅頭神殿：釋放強烈「厄除吼叫」，驅散霉運。', map: 'https://www.google.com/maps/search/?api=1&query=Namba+Yasaka+Shrine' },
-                                { name: '法善寺', desc: '水掛不動明王：長滿青苔的尊者，給予「心願成就」加護。', map: 'https://www.google.com/maps/search/?api=1&query=Hozenji+Temple' },
-                                { name: '四天王寺', desc: '古代聖域：強大的魔力回復點，適合淨化身心。', map: 'https://www.google.com/maps/search/?api=1&query=Shitennoji' },
-                                { name: '千日前道具街', desc: '矮人鐵匠街：販售各種廚具神器的工坊聚落。', map: 'https://www.google.com/maps/search/?api=1&query=Sennichimae+Doguyasuji' }
-                        ]}
+                            ]
+                        },
+                        { 
+                            id: 'layer2', level: 'LV.2', name: '第二層：心齋橋', shortName: '心齋橋', title: '心齋橋筋 + 道頓堀', rpgTitle: '【獸族領地】', 
+                            colorClass: 'border-l-orange-500', themeColor: '#f97316', icon: 'fa-solid fa-bag-shopping', 
+                            desc: '充滿慾望與霓虹燈光的繁華領域，巨型招牌如同神獸般俯瞰著冒險者。', 
+                            spots: [
+                                { name: '固力果跑跑人', desc: '地下城大 BOSS (必拍地標)', map: 'https://www.google.com/maps/search/?api=1&query=Glico+Man+Sign', items: ['證明到此一遊的契約印記(拍照)', '跑跑人召喚手勢'] },
+                                { name: '大丸心齋橋百貨', desc: '獸族交易大殿 (華麗哥德風建築)', map: 'https://www.google.com/maps/search/?api=1&query=Daimaru+Shinsaibashi', items: ['獸族貴族外皮(名牌服飾)', '魅惑面具(專櫃化妝品)', '寶石般的馬卡龍'] },
+                                { name: '心齋橋 PARCO', desc: '多層幻境商城 (潮牌/動漫)', map: 'https://www.google.com/maps/search/?api=1&query=Shinsaibashi+PARCO', items: ['吉卜力森林的遺落物(橡子共和國)', '異界潮服', '哥吉拉的背鰭'] },
+                                { name: '惠比壽塔摩天輪', desc: '地下城小 BOSS (黃色迴轉塔)', map: 'https://www.google.com/maps/search/?api=1&query=Don+Quijote+Dotonbori', items: ['黃色巨塔的俯視權', '驚安殿堂的入場券'] }
+                            ]
+                        },
+                        { 
+                            id: 'layer3', level: 'LV.3', name: '第三層：日本橋', shortName: '日本橋', title: '日本橋商圈', rpgTitle: '【魔族地盤】', 
+                            colorClass: 'border-l-purple-500', themeColor: '#a855f7', icon: 'fa-solid fa-gamepad', 
+                            desc: '魔力密度極高的區域，販售禁忌的魔道書(漫畫)、魔像(模型)與稀有卡牌。', 
+                            spots: [
+                                { name: 'Animate 大阪日本橋', desc: '魔導書類圖書館', map: 'https://www.google.com/maps/search/?api=1&query=Animate+Osaka+Nipponbashi', items: ['二次元禁書(漫畫)', '聲優的靈魂碎片(CD)', '痛包防禦具'] },
+                                { name: '駿河屋 本館', desc: '二手聖遺物寶庫', map: 'https://www.google.com/maps/search/?api=1&query=Surugaya+Osaka+Nipponbashi', items: ['昭和時代的遺物(老遊戲)', '被封印的英靈(二手手辦)', '稀有卡牌'] },
+                                { name: 'SUPER KIDS LAND', desc: '機巧兵團總部 (模型)', map: 'https://www.google.com/maps/search/?api=1&query=Super+Kids+Land+Main+Store', items: ['機動戰士的骨架(鋼普拉)', '四驅衝鋒戰車(Tamiya)', '微縮世界(鐵道模型)'] },
+                                { name: 'JUNGLE 總店', desc: '特攝與機甲魔像交易所', map: 'https://www.google.com/maps/search/?api=1&query=Jungle+Osaka+Nipponbashi', items: ['特攝英雄的面具', '巨大怪獸的標本(軟膠)', '超合金魂'] }
+                            ]
+                        },
+                        { 
+                            id: 'layer4', level: 'LV.4', name: '第四層：梅田', shortName: '梅田', title: '梅田 (Umeda)', rpgTitle: '【精靈族領地】', 
+                            colorClass: 'border-l-emerald-400', themeColor: '#34d399', icon: 'fa-regular fa-building', 
+                            desc: '高聳入雲的玻璃巨塔森林，充滿高級感與秩序，是高階冒險者出沒之地。', 
+                            spots: [
+                                { name: 'GRAND FRONT OSAKA', desc: '精靈王庭 (北館/南館)', map: 'https://www.google.com/maps/search/?api=1&query=Grand+Front+Osaka', items: ['精靈族的織物(設計師品牌)', '無印良品的淨化結界道具', '知性眼鏡'] },
+                                { name: 'LUCUA / LUCUA 1100', desc: '時尚精靈市集', map: 'https://www.google.com/maps/search/?api=1&query=LUCUA+Osaka', items: ['流行尖端的幻影(日系雜貨)', '都會精靈的口糧(排隊甜點)'] },
+                                { name: 'Yodobashi 梅田', desc: '精靈科技要塞', map: 'https://www.google.com/maps/search/?api=1&query=Yodobashi+Camera+Multimedia+Umeda', items: ['雷屬性核心(電池)', '光學紀錄儀(相機)', '轉蛋牆的試煉'] },
+                                { name: '大丸梅田店', desc: '任天堂與寶可夢中心所在地', map: 'https://www.google.com/maps/search/?api=1&query=Daimaru+Umeda', items: ['水管工人的紅色帽子(瑪利歐)', '神獸捕捉球(寶可夢)', '黃色放電鼠的玩偶'] },
+                                { name: 'KITTE 大阪', desc: '新開啟的白之塔', map: 'https://www.google.com/maps/search/?api=1&query=KITTE+Osaka', items: ['日本各地的特產貢品', '舊郵局的記憶碎片'] }
+                            ]
+                        },
+                        { 
+                            id: 'layer5', level: 'LV.5', name: '第五層：地下街', shortName: '地下街', title: '梅田地下迷宮', rpgTitle: '【黑暗精靈領地‧顛倒世界】', 
+                            colorClass: 'border-l-slate-500', themeColor: '#64748b', icon: 'fa-solid fa-dungeon', 
+                            desc: '號稱「新手殺手」的複雜地下網絡。高濃度魔素(人流)匯集成河，容易迷失方向。', 
+                            spots: [
+                                { name: '阪急三番街', desc: 'Kiddy Land 玩具巢穴', map: 'https://www.google.com/maps/search/?api=1&query=Hankyu+Sanbangai', items: ['軟綿綿的夢魘(卡比)', '角落生物的祭壇', '拉拉熊的慵懶氣息'] },
+                                { name: 'UMEDA FOOD HALL', desc: '地下補給大廳', map: 'https://www.google.com/maps/search/?api=1&query=UMEDA+FOOD+HALL', items: ['各族冒險者的伙食', '快速回復藥水(啤酒)'] },
+                                { name: 'DIAMOR OSAKA', desc: '大理石迴廊', map: 'https://www.google.com/maps/search/?api=1&query=Diamor+Osaka', items: ['光輝的玻璃鞋', '貴婦人的下午茶'] },
+                                { name: 'Whity 梅田', desc: '白之地下道', map: 'https://www.google.com/maps/search/?api=1&query=Whity+Umeda', items: ['迷路旅人的麵包屑(泉之廣場)'] }
+                            ]
+                        },
+                        { 
+                            id: 'layer6', level: 'LV.6', name: '第六層：天王寺', shortName: '天王寺', title: '天王寺‧阿倍野', rpgTitle: '【神界】', 
+                            colorClass: 'border-l-yellow-500', themeColor: '#eab308', icon: 'fa-solid fa-tower-observation', 
+                            desc: '擁有全日本最高的結界塔，是距離天空最近的區域，同時保留著昭和時代的混沌感。', 
+                            spots: [
+                                { name: '天王寺動物園', desc: '神獸以此為家', map: 'https://www.google.com/maps/search/?api=1&query=Tennoji+Zoo', items: ['白熊的咆哮', '奇異鳥的隱身術'] },
+                                { name: '通天閣', desc: '舊時代的神之塔', map: 'https://www.google.com/maps/search/?api=1&query=Tsutenkaku', items: ['比利肯神的腳底(好運)', '復古的霓虹光輝'] },
+                                { name: '阿倍野 HARUKAS 300', desc: '天空迴廊 (絕景展望台)', map: 'https://www.google.com/maps/search/?api=1&query=Abeno+Harukas+300', items: ['天空霸者的視野', '阿倍野熊的圖騰', '雲端上的冰淇淋'] },
+                                { name: '新世界本通商店街', desc: '下町神界 (串炸聖地)', map: 'https://www.google.com/maps/search/?api=1&query=Shinsekai+Hondori', items: ['射擊遊戲的獎品', '禁止二次沾醬的誓言', '將棋俱樂部的煙味'] }
+                            ]
+                        },
+                        { 
+                            id: 'special', level: 'SP', name: '特殊點', shortName: '隱藏支線', title: '隱藏支線', rpgTitle: '【特殊能力獲取點】', 
+                            colorClass: 'border-l-pink-500', themeColor: '#ec4899', icon: 'fa-solid fa-star', 
+                            desc: '散落在迷宮各處的特殊祭壇與工坊，可獲得強力 Buff。', 
+                            spots: [
+                                { name: '難波八阪神社', desc: '巨大獅頭神殿：釋放強烈「厄除吼叫」，驅散霉運。', map: 'https://www.google.com/maps/search/?api=1&query=Namba+Yasaka+Shrine', items: ['厄除御守', '獅子頭繪馬'] },
+                                { name: '法善寺', desc: '水掛不動明王：長滿青苔的尊者，給予「心願成就」加護。', map: 'https://www.google.com/maps/search/?api=1&query=Hozenji+Temple', items: ['夫婦善哉(紅豆湯)', '青苔尊者的祝福'] },
+                                { name: '四天王寺', desc: '古代聖域：強大的魔力回復點，適合淨化身心。', map: 'https://www.google.com/maps/search/?api=1&query=Shitennoji', items: ['聖德太子的智慧', '龜池的長壽光環'] },
+                                { name: '千日前道具街', desc: '矮人鐵匠街：販售各種廚具神器的工坊聚落。', map: 'https://www.google.com/maps/search/?api=1&query=Sennichimae+Doguyasuji', items: ['傳說中的菜刀', '永不磨損的鍋具', '幾可亂真的食物模型'] }
+                            ]
+                        }
                     ],
                     kyoto: [
                         {
@@ -1288,8 +1306,7 @@
                     ]
                 };
                 const currentSupplyList = computed(() => supplyData[supplySubTab.value] || []);
-
-                const itineraryData = ref({
+const itineraryData = ref({
                      '2025-12-14': [
                         { id: 1401, time: '05:45', title: '黎明前的集結：桃園空港前哨站', desc: '【任務起點：前哨站集結】天色尚未轉亮，桃園空港前哨站仍帶著夜色的餘溫。遠征隊成員揹著行囊陸續現身，在冷空氣與霧氣中回報到齊。這裡，是從日常世界跨入異境冒險的第一道轉移門檻。隊伍在此確認通行證、入境許可術式、行李裝備與夥伴狀態，完成後，精神值 +100，隊伍穩定度 +100。\n\n⚠️ 備註：建議提早抵達，預留托運儀式與安檢咒陣的時間，以免錯過飛空艇召喚時刻。', type: 'transport' },
                         { id: 1402, time: '07:25', title: '登機門前的召喚陣待命', desc: '【前線待機任務：飛艇召喚陣】遠征隊在登機門前集合，在龍鱗飛艇的召喚陣等待。隊員們一邊檢查裝備欄位與座位分配，一邊調整背包與披風，準備踏上通往關西的空中航路。所有人確認無誤後進入「待命」狀態，行前緊張度 +30，專注度 -10。\n\n⚠️ 備註：隨時注意登機門魔法陣是否變更，請保持魔導通訊石訊息暢通，以免錯過登機法陣。', type: 'transport' },
@@ -1461,10 +1478,10 @@
 
                 const magicSummaryQuote = computed(() => {
                     const amount = todayTotalTWD.value;
-                    if (amount < 500) return '錢袋深處傳來規律的打呼聲，這點微小的加隆對小精靈毫無干擾。';
-                    if (amount < 1500) return '小精靈熟練地數出相應的加隆，並對這次的交易點頭表示認可。';
-                    if (amount < 3000) return '交出加隆時，小精靈的手指稍微用力捏了一下，眼神充滿了不捨。';
-                    if (amount < 5000) return '錢袋精靈正死命拉緊束口繩，滿頭大汗地試圖阻止加隆外流！';
+                    if (amount < 1000) return '錢袋深處傳來規律的打呼聲，這點微小的加隆對小精靈毫無干擾。';
+                    if (amount < 5000) return '小精靈熟練地數出相應的加隆，並對這次的交易點頭表示認可。';
+                    if (amount < 10000) return '交出加隆時，小精靈的手指稍微用力捏了一下，眼神充滿了不捨。';
+                    if (amount < 20000) return '錢袋精靈正死命拉緊束口繩，滿頭大汗地試圖阻止加隆外流！';
                     return '加隆如潰堤的洪水般傾瀉而下，連錢袋精靈都被這股金幣洪流沖走了。';
                 });
 
@@ -1555,11 +1572,18 @@
                     }
                     closeExpenseModal();
                 };
-                const deleteExpense = () => {
-                    const idx = expenses.value.findIndex(e => e.id === editingExpense.value.id);
-                    if (idx !== -1) expenses.value.splice(idx, 1);
-                    closeExpenseModal();
-                };
+                // 1. 按下垃圾桶 Icon：只打開確認視窗 
+                const requestDelete = () => { 
+                        showDeleteConfirm.value = true; 
+                 }; 
+
+               // 2. 按下「遺忘咒」：真的刪除資料 
+              const confirmDeleteAction = () => { 
+                     const idx = expenses.value.findIndex(e => e.id === editingExpense.value.id); 
+                     if (idx !== -1) expenses.value.splice(idx, 1); 
+                     showDeleteConfirm.value = false; // 關閉確認窗 
+                     closeExpenseModal(); // 關閉編輯窗 
+               };
 
                 // Watchers & Mounted
                 onMounted(() => {
@@ -1573,28 +1597,99 @@
                 });
                 watch(selectedDate, () => nextTick(() => initSortable()));
 
-                return { 
-                    isLoading, currentTab, 
+// ==========================================
+                // ★★★ 步驟 2 & 3：記憶魔法與重置功能 ★★★
+                // ==========================================
+                
+                const STORAGE_KEY = 'rpg-expedition-save-v1'; // 這是存檔在瀏覽器的暗號
+
+                // 定義我們要監聽並存檔的資料
+                const stateToSave = computed(() => ({
+                    itineraryData: itineraryData.value,     // 行程表
+                    expenses: expenses.value,               // 記帳資料
+                    checklistItems: checklistItems.value,   // 行前清單
+                    bagMemo: bagMemo.value,                 // 備忘錄
+                    exchangeRate: exchangeRate.value,       // 匯率設定
+                }));
+
+                // 讀取魔法：網頁一打開，就去問瀏覽器「有沒有存檔？」
+                const loadFromStorage = () => {
+                    const savedData = localStorage.getItem(STORAGE_KEY);
+                    if (savedData) {
+                        try {
+                            const parsed = JSON.parse(savedData);
+                            // 如果有存檔，就用存檔覆蓋掉預設值
+                            if (parsed.itineraryData) itineraryData.value = parsed.itineraryData;
+                            if (parsed.expenses) expenses.value = parsed.expenses;
+                            if (parsed.checklistItems) checklistItems.value = parsed.checklistItems;
+                            if (parsed.bagMemo) bagMemo.value = parsed.bagMemo;
+                            if (parsed.exchangeRate) exchangeRate.value = parsed.exchangeRate;
+                            console.log('📖 成功讀取冒險紀錄！');
+                        } catch (e) {
+                            console.error('讀取失敗，使用預設值', e);
+                        }
+                    }
+                };
+
+                // 立即執行讀取
+                loadFromStorage();
+
+                // 存檔魔法：只要資料一變動，就自動存檔 (Auto Save)
+                watch(stateToSave, (newVal) => {
+                    localStorage.setItem(STORAGE_KEY, JSON.stringify(newVal));
+                }, { deep: true });
+
+                // 重置按鈕的功能：清除存檔並重新整理
+                const resetData = () => {
+                    if(confirm('確定要銷毀所有紀錄，重置回初始狀態嗎？\n(此動作無法復原，會變回預設行程)')) {
+                        localStorage.removeItem(STORAGE_KEY);
+                        location.reload(); // 重新整理網頁
+                    }
+                };
+                
+                // ==========================================
+                // ★★★ 程式碼結束 ★★★
+                // ==========================================
+
+
+              return {
+                    isLoading, currentTab,
                     // Shared
                     tabs, weatherForecast, headerTitle, headerSubtitle, headerIcon,
+                    
                     // AI / Cat
                     apiKey, chatInput, chatHistory, isSummoning, summonFamiliar, showChatModal, toggleAI,
-                    // Journal
+                    
+                    // Journal (冒險日誌)
                     days, selectedDate, selectDay, getChapterTitle, getChapterSubtitle, currentEvents, getCategoryColor, getCategoryIcon,
                     isModalOpen, openAddModal, editEvent, closeModal, saveEvent, editingEvent, eventTypes, modalMode, handleDelete, confirmDelete,
-                    // Guild & Supply
+                    
+                    // Guild & Supply (公會與補給)
                     guildSubTab, guildData, guildTabs, selectedLayer, currentLayerData, selectedKyotoLayer, currentKyotoData,
                     supplySubTab, supplyTabs, currentSupplyList,
-                    // Coins
+                    
+                    // Coins (加隆/記帳) - 關鍵修復區
                     coinSubTab, coinTabs, chapters, selectedChapter, expenses, currentChapterExpenses, todayTotalTWD, todayTotalYen, grandTotalTWD, magicSummaryQuote,
-                    formatMoney, getExpenseIcon, getExpenseLabel, getPaymentIcon, isExpenseModalOpen, openExpenseModal, editExpense, closeExpenseModal, saveExpense, deleteExpense,
+                    formatMoney, getExpenseIcon, getExpenseLabel, getPaymentIcon, 
+                    
+                    // 記帳視窗開關與功能
+                    isExpenseModalOpen, openExpenseModal, editExpense, closeExpenseModal, saveExpense, 
+                    
+                    // 刪除確認 (遺忘咒) 功能
+                    showDeleteConfirm, requestDelete, confirmDeleteAction,
+                    
+                    // 其他記帳變數
                     expenseModalMode, editingExpense, expenseCategories, confirmDeleteExpense, exchangeRate, lastRateUpdate, calculatedTWD,
+                    
+                    // 圖表變數
                     pieChartData, pieChartGradient, lineChartPath, lineChartAreaPath, lineChartDots, getChapterTotal, getChapterSummarySentence, currentChapterInfo,
-                    // Bag
-                    bagMemo, checklistItems
+                    
+                    // Bag (行囊) & 重置
+                    bagMemo, checklistItems,
+                    resetData
                 };
             }
         }).mount('#app');
     </script>
-</body>
-</html>
+
+
